@@ -25,6 +25,7 @@ class DeviceSeeder extends Seeder
             'name' => 'API Test User',
             'email' => 'user@example.com',
             'password' => Hash::make('password'), // password
+            'phone' => '1234567890',
         ]);
 
         Device::factory()->count(2)->create([
