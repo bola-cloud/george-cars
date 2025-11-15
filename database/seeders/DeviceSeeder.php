@@ -26,6 +26,7 @@ class DeviceSeeder extends Seeder
             'email' => 'user@example.com',
             'password' => Hash::make('password'), // password
             'phone' => '1234567890',
+            'ip' => '127.0.0.1',
         ]);
 
         Device::factory()->count(2)->create([

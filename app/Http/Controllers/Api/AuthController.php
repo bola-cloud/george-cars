@@ -99,4 +99,40 @@ class AuthController extends Controller
             'data' => null,
         ], 200);
     }
+
+    /**
+     * Update authenticated user data.
+     */
+    public function update(Request $request)
+    {
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:255',
+            'ip' => 'nullable|ip',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation errors',
+                'status' => false,
+                'data' => $validator->errors(),
+            ], 422);
+        }
+
+        $data = $request->only(['name', 'email', 'phone', 'ip']);
+
+        // If email is being updated, you may want to reset verification; left as-is for now.
+        $user->update($data);
+
+        return response()->json([
+            'message' => 'User updated',
+            'status' => true,
+            'data' => [
+                'user' => $user->load('devices'),
+            ],
+        ], 200);
+    }
 }

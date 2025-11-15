@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DeviceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +22,12 @@ Route::post('login', [AuthController::class, 'login']);
 // Protected Routes (Require authentication)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
+
+    // Update authenticated user
+    Route::match(['put', 'patch'], '/user', [AuthController::class, 'update']);
+
+    // Create a device for authenticated user
+    Route::post('/devices', [DeviceController::class, 'store']);
 
     // Logout route
     Route::post('logout', [AuthController::class, 'logout']);
