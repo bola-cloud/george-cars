@@ -21,5 +21,5 @@ Route::group([
         'verified',
     ]
 ], function () {
-    Route::get('/', [\App\Http\Controllers\Admin\Dashboard::class, 'index'])->name('dashboard');
 });
+    Route::get('/', [\App\Http\Controllers\Admin\Dashboard::class, 'index'])->name('dashboard');
