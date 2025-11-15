@@ -37,6 +37,6 @@ class DeviceController extends Controller
             'message' => 'Device created',
             'status' => true,
             'data' => $device,
-        ], 201);
+        ], 200);
     }
 }
