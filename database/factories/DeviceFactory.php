@@ -22,6 +22,7 @@ class DeviceFactory extends Factory
         return [
             'name' => $this->faker->word() . ' ' . $this->faker->word(),
             'serial' => strtoupper($this->faker->bothify('??####')),
+            'ip' => $this->faker->ipv4(),
             'meta' => [
                 'platform' => $this->faker->randomElement(['ios', 'android', 'linux', 'windows']),
                 'os_version' => $this->faker->semver(),

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('serial')->nullable();
             $table->json('meta')->nullable();
+            $table->string('ip')->nullable();
             $table->timestamps();
         });
     }

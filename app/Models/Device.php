@@ -15,6 +15,7 @@ class Device extends Model
         'name',
         'serial',
         'meta',
+        'ip',
     ];
 
     protected $casts = [

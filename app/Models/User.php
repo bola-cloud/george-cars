@@ -30,7 +30,6 @@ class User extends Authenticatable
         'email',
         'password',
         'phone',
-        'ip',
     ];
 
     public function projects(): HasMany
