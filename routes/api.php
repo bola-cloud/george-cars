@@ -28,6 +28,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Create a device for authenticated user
     Route::post('/devices', [DeviceController::class, 'store']);
+    // Update a device (owned by authenticated user)
+    Route::match(['put','patch'], '/devices/{id}', [DeviceController::class, 'update']);
 
     // Logout route
     Route::post('logout', [AuthController::class, 'logout']);

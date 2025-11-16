@@ -41,4 +41,44 @@ class DeviceController extends Controller
             'data' => $device,
         ], 200);
     }
+
+    /**
+     * Update a device belonging to the authenticated user.
+     */
+    public function update(Request $request, $id)
+    {
+        $device = $request->user()->devices()->where('id', $id)->first();
+
+        if (! $device) {
+            return response()->json([
+                'message' => 'Device not found or not owned by user',
+                'status' => false,
+                'data' => null,
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string|max:255',
+            'serial' => 'nullable|string|max:255',
+            'meta' => 'nullable|array',
+            'ip' => 'nullable|ip',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation errors',
+                'status' => false,
+                'data' => $validator->errors(),
+            ], 422);
+        }
+
+        $device->fill($request->only(['name', 'serial', 'meta', 'ip']));
+        $device->save();
+
+        return response()->json([
+            'message' => 'Device updated',
+            'status' => true,
+            'data' => $device,
+        ], 200);
+    }
 }
