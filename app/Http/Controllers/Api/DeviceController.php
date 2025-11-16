@@ -17,6 +17,7 @@ class DeviceController extends Controller
             'name' => 'required|string|max:255',
             'serial' => 'nullable|string|max:255',
             'meta' => 'nullable|array',
+            'ip' => 'nullable|ip',
         ]);
 
         if ($validator->fails()) {
@@ -31,6 +32,7 @@ class DeviceController extends Controller
             'name' => $request->name,
             'serial' => $request->serial,
             'meta' => $request->meta,
+            'ip' => $request->input('ip'),
         ]);
 
         return response()->json([
