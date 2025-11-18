@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DeviceController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\DeviceController as AdminDeviceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,4 +35,21 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Logout route
     Route::post('logout', [AuthController::class, 'logout']);
+
+    // Admin routes
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        // Users
+        Route::get('users', [AdminUserController::class, 'index']);
+        Route::post('users', [AdminUserController::class, 'store']);
+        Route::get('users/{id}', [AdminUserController::class, 'show']);
+        Route::match(['put','patch'], 'users/{id}', [AdminUserController::class, 'update']);
+        Route::delete('users/{id}', [AdminUserController::class, 'destroy']);
+
+        // Devices
+        Route::get('devices', [AdminDeviceController::class, 'index']);
+        Route::post('devices', [AdminDeviceController::class, 'store']);
+        Route::get('devices/{id}', [AdminDeviceController::class, 'show']);
+        Route::match(['put','patch'], 'devices/{id}', [AdminDeviceController::class, 'update']);
+        Route::delete('devices/{id}', [AdminDeviceController::class, 'destroy']);
+    });
 });

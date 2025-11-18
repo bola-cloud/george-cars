@@ -13,11 +13,9 @@ class DeviceController extends Controller
      */
     public function store(Request $request)
     {
+        // Mobile claim mode: request must contain only 'serial'.
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'serial' => 'nullable|string|max:255',
-            'meta' => 'nullable|array',
-            'ip' => 'nullable|ip',
+            'serial' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -28,15 +26,33 @@ class DeviceController extends Controller
             ], 422);
         }
 
-        $device = $request->user()->devices()->create([
-            'name' => $request->name,
-            'serial' => $request->serial,
-            'meta' => $request->meta,
-            'ip' => $request->input('ip'),
-        ]);
+        $serial = $request->input('serial');
+
+        $device = \App\Models\Device::where('serial', $serial)->first();
+
+        if (! $device) {
+            return response()->json([
+                'message' => 'Device with provided serial not found',
+                'status' => false,
+                'data' => null,
+            ], 404);
+        }
+
+        if ($device->user_id && $device->user_id != $request->user()->id) {
+            return response()->json([
+                'message' => 'Device already claimed',
+                'status' => false,
+                'data' => null,
+            ], 409);
+        }
+
+        $device->user_id = $request->user()->id;
+        // Save the request IP as device IP when claimed
+        $device->ip = $request->ip();
+        $device->save();
 
         return response()->json([
-            'message' => 'Device created',
+            'message' => 'Device claimed',
             'status' => true,
             'data' => $device,
         ], 200);
