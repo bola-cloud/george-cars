@@ -13,9 +13,11 @@ class DeviceController extends Controller
      */
     public function store(Request $request)
     {
-        // Mobile claim mode: request must contain only 'serial'.
+        // Mobile claim mode: request must contain 'serial'. Optional: 'ip' and 'name' to update device on claim.
         $validator = Validator::make($request->all(), [
             'serial' => 'required|string|max:255',
+            'ip' => 'required|ip',
+            'name' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -47,8 +49,12 @@ class DeviceController extends Controller
         }
 
         $device->user_id = $request->user()->id;
-        // Save the request IP as device IP when claimed
-        $device->ip = $request->ip();
+        // Update name if provided
+        if ($request->filled('name')) {
+            $device->name = $request->input('name');
+        }
+        // Use provided ip if present, otherwise use request IP
+        $device->ip = $request->input('ip', $request->ip());
         $device->save();
 
         return response()->json([
