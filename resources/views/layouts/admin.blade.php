@@ -142,7 +142,7 @@
                         <li class="nav-item {{ Route::currentRouteName() == 'dashboard' ? 'active' : '' }}">
                             <a href="{{ route('dashboard') }}">
                                 <i class="la la-share-alt"></i>
-                                <span class="menu-title" data-i18n="nav.morris_charts.main">{{ __('lang.dashboard') }}</span>
+                                <span class="menu-title" data-i18n="nav.morris_charts.main">{{ __('Dashboard') }}</span>
                             </a>
                         </li>
                         <li class="nav-item {{ Request::routeIs('admin.users.*') ? 'active' : '' }}">
@@ -200,7 +200,7 @@
             let sortableList = document.getElementById('sortable-list');
             let confirmButton = document.getElementById('confirm-order-btn');
             let updatedOrder = [];
-    
+
             // Ensure that the sortableList exists in the DOM
             if (sortableList) {
                 // Initialize SortableJS manually
@@ -210,18 +210,18 @@
                     onEnd: function (event) {
                         // Capture the new order
                         updatedOrder = Array.from(event.target.children).map((el, index) => el.getAttribute('wire:sortable.item'));
-    
+
                         // Show the confirm button
                         confirmButton.style.display = 'block';
                     }
                 });
             }
-    
+
             // Handle the confirm button click
             confirmButton.addEventListener('click', function () {
                 // Emit the Livewire event with the updated order
                 Livewire.emit('updateOrder', updatedOrder);
-    
+
                 // Hide the confirm button after order is confirmed
                 confirmButton.style.display = 'none';
             });
