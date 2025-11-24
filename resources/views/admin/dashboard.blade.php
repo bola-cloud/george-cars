@@ -5,8 +5,8 @@
 <div class="card" style="height:80vh !important; position: relative; overflow: hidden;">
     <div class="d-flex justify-content-center align-items-center" style="height: 100%;">
         <div class="text-center">
-            <h1 class="mb-3">{{ __('lang.welcome_dashboard') }}</h1>
-            <p class="fs-4">{{ __('lang.dashboard_message') }}</p>
+            <h1 class="mb-3">{{ __('Welcome Dashboard') }}</h1>
+            {{-- <p class="fs-4">{{ __('lang.dashboard_message') }}</p> --}}
         </div>
     </div>
 
