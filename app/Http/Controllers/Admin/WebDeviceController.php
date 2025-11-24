@@ -25,7 +25,7 @@ class WebDeviceController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'serial' => 'required|string|max:255|unique:devices,serial',
+            'serial' => 'nullable|string|max:255|unique:devices,serial',
             'name' => 'nullable|string|max:255',
             'ip' => 'nullable|ip',
             'user_id' => 'nullable|exists:users,id',
@@ -52,7 +52,7 @@ class WebDeviceController extends Controller
         $device = Device::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'serial' => 'sometimes|required|string|max:255|unique:devices,serial,'.$id,
+            'serial' => 'sometimes|nullable|string|max:255|unique:devices,serial,'.$id,
             'name' => 'nullable|string|max:255',
             'ip' => 'nullable|ip',
             'user_id' => 'nullable|exists:users,id',

@@ -28,7 +28,7 @@ class DeviceController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'serial' => 'required|string|max:255|unique:devices,serial',
+            'serial' => 'nullable|string|max:255|unique:devices,serial',
             'meta' => 'nullable|array',
             'ip' => 'nullable|ip',
             'user_id' => 'nullable|exists:users,id',
@@ -51,7 +51,7 @@ class DeviceController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:255',
-            'serial' => 'sometimes|required|string|max:255|unique:devices,serial,'.$id,
+            'serial' => 'sometimes|nullable|string|max:255|unique:devices,serial,'.$id,
             'meta' => 'nullable|array',
             'ip' => 'nullable|ip',
             'user_id' => 'nullable|exists:users,id',

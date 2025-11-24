@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Device;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Device>
@@ -21,7 +22,8 @@ class DeviceFactory extends Factory
     {
         return [
             'name' => $this->faker->word() . ' ' . $this->faker->word(),
-            'serial' => strtoupper($this->faker->bothify('??####')),
+            // generate a 14-char alphanumeric serial by default (uppercased)
+            'serial' => Str::upper(Str::random(14)),
             'ip' => $this->faker->ipv4(),
             'meta' => [
                 'platform' => $this->faker->randomElement(['ios', 'android', 'linux', 'windows']),
