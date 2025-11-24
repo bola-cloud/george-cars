@@ -145,6 +145,18 @@
                                 <span class="menu-title" data-i18n="nav.morris_charts.main">{{ __('lang.dashboard') }}</span>
                             </a>
                         </li>
+                        <li class="nav-item {{ Request::routeIs('admin.users.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.users.index') }}">
+                                <i class="la la-users"></i>
+                                <span class="menu-title">{{ __('Users') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ Request::routeIs('admin.devices.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.devices.index') }}">
+                                <i class="la la-mobile"></i>
+                                <span class="menu-title">{{ __('Devices') }}</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
