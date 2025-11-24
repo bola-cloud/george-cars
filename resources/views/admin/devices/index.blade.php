@@ -29,6 +29,6 @@
     </tbody>
 </table>
 
-{{ $devices->links() }}
+{{ $devices->links('pagination::bootstrap-4') }}
 
 @endsection
