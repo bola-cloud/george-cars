@@ -17,7 +17,11 @@
     @csrf
     <div class="mb-3">
         <label class="form-label">Serial</label>
-        <input type="text" name="serial" class="form-control" value="{{ old('serial') }}" required>
+        <div class="input-group">
+            <input type="text" id="serial" name="serial" class="form-control" value="{{ old('serial') }}">
+            <button type="button" id="generate-serial" class="btn btn-outline-secondary">Generate</button>
+        </div>
+        <div class="form-text">Leave empty to auto-generate on save or click Generate to get a unique 14-character serial.</div>
     </div>
     <div class="mb-3">
         <label class="form-label">Name</label>
@@ -38,5 +42,25 @@
     </div>
     <button class="btn btn-primary">Create</button>
 </form>
+
+@push('js')
+<script>
+    document.getElementById('generate-serial').addEventListener('click', function() {
+        fetch("{{ route('admin.devices.generate-serial') }}", {
+            headers: { 'Accept': 'application/json' },
+            credentials: 'same-origin'
+        })
+        .then(resp => resp.json())
+        .then(data => {
+            if (data.serial) {
+                document.getElementById('serial').value = data.serial;
+            } else {
+                alert('Failed to generate serial');
+            }
+        })
+        .catch(() => alert('Failed to generate serial'));
+    });
+</script>
+@endpush
 
 @endsection

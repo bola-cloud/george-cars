@@ -22,6 +22,15 @@ class WebDeviceController extends Controller
         return view('admin.devices.create', compact('users'));
     }
 
+    /**
+     * Return a generated unique serial (JSON) for AJAX use.
+     */
+    public function generateSerial()
+    {
+        $serial = Device::generateUniqueSerial(14);
+        return response()->json(['serial' => $serial], 200);
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [

@@ -25,6 +25,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Devices
     Route::get('devices', [WebDeviceController::class, 'index'])->name('devices.index');
+    Route::get('devices/generate-serial', [WebDeviceController::class, 'generateSerial'])->name('devices.generate-serial');
     Route::get('devices/create', [WebDeviceController::class, 'create'])->name('devices.create');
     Route::post('devices', [WebDeviceController::class, 'store'])->name('devices.store');
     Route::get('devices/{id}/edit', [WebDeviceController::class, 'edit'])->name('devices.edit');
