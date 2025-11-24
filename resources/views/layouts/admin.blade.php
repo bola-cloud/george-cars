@@ -76,7 +76,7 @@
                     <li class="nav-item mobile-menu d-md-none mr-auto"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu font-large-1"></i></a></li>
                     <li class="nav-item">
                         <a class="navbar-brand" href="{{route('dashboard')}}">
-                          <img class="brand-logo" alt="modern admin logo" src="{{asset('app-assets/images/2d354e8d-2e20-453c-bca4-09e8ed7703d4.jpeg')}}"
+                          <img class="brand-logo" alt="modern admin logo" src="https://www.portfolio.infinitsmart.com/storage/settings/EMh6ktFKBjCTYd6rGWaYe3bmMVShRPxDENCbwdSc.svg"
                           style="height: 55px; width: 178px;">
                           {{-- <h3 class="brand-text">Screen Video </h3> --}}
                         </a>
