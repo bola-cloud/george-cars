@@ -103,4 +103,28 @@ class DeviceController extends Controller
             'data' => $device,
         ], 200);
     }
+
+    /**
+     * Delete a device that belongs to the authenticated user.
+     */
+    public function destroy(Request $request, $id)
+    {
+        $device = $request->user()->devices()->where('id', $id)->first();
+
+        if (! $device) {
+            return response()->json([
+                'message' => 'Device not found or not owned by user',
+                'status' => false,
+                'data' => null,
+            ], 404);
+        }
+
+        $device->delete();
+
+        return response()->json([
+            'message' => 'Device deleted',
+            'status' => true,
+            'data' => null,
+        ], 200);
+    }
 }

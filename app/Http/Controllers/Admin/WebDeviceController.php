@@ -71,7 +71,15 @@ class WebDeviceController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $device->update($request->only(['serial','name','ip','user_id']));
+        $data = $request->only(['serial','name','ip','user_id']);
+        // Remove keys that are explicitly null so we don't attempt to set NOT NULL columns to null.
+        foreach ($data as $k => $v) {
+            if (is_null($v)) {
+                unset($data[$k]);
+            }
+        }
+
+        $device->update($data);
 
         return redirect()->route('admin.devices.index')->with('success', 'Device updated');
     }

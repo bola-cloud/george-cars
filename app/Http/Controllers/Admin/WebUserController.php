@@ -48,6 +48,12 @@ class WebUserController extends Controller
         return view('admin.users.edit', compact('user'));
     }
 
+    public function show($id)
+    {
+        $user = User::with('devices')->findOrFail($id);
+        return view('admin.users.show', compact('user'));
+    }
+
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);

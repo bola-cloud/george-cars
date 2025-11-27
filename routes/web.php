@@ -19,6 +19,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('users', [WebUserController::class, 'index'])->name('users.index');
     Route::get('users/create', [WebUserController::class, 'create'])->name('users.create');
     Route::post('users', [WebUserController::class, 'store'])->name('users.store');
+    Route::get('users/{id}', [WebUserController::class, 'show'])->name('users.show');
     Route::get('users/{id}/edit', [WebUserController::class, 'edit'])->name('users.edit');
     Route::match(['put','patch'], 'users/{id}', [WebUserController::class, 'update'])->name('users.update');
     Route::delete('users/{id}', [WebUserController::class, 'destroy'])->name('users.destroy');
