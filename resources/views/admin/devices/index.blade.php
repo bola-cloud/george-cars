@@ -3,7 +3,15 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Devices</h1>
-    <a href="{{ route('admin.devices.create') }}" class="btn btn-primary">Create Device</a>
+    <div class="d-flex">
+        <form method="GET" action="{{ route('admin.devices.index') }}" class="me-2">
+            <div class="input-group">
+                <input type="search" name="q" class="form-control" placeholder="Search devices..." value="{{ request('q') }}">
+                <button class="btn btn-outline-secondary" type="submit">Search</button>
+            </div>
+        </form>
+        <a href="{{ route('admin.devices.create') }}" class="btn btn-primary">Create Device</a>
+    </div>
 </div>
 
 <table class="table table-striped">
@@ -29,6 +37,6 @@
     </tbody>
 </table>
 
-{{ $devices->links('pagination::bootstrap-4') }}
+{{ $devices->appends(request()->except('page'))->links('pagination::bootstrap-4') }}
 
 @endsection

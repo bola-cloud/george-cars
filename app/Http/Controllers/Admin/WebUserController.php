@@ -10,9 +10,18 @@ use Illuminate\Support\Facades\Validator;
 
 class WebUserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::paginate(20);
+        $q = $request->get('q');
+
+        $users = User::when($q, function ($query) use ($q) {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('name', 'like', "%{$q}%")
+                    ->orWhere('email', 'like', "%{$q}%")
+                    ->orWhere('phone', 'like', "%{$q}%");
+            });
+        })->paginate(20);
+
         return view('admin.users.index', compact('users'));
     }
 

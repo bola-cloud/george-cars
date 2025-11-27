@@ -10,9 +10,23 @@ use Illuminate\Support\Facades\Validator;
 
 class WebDeviceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $devices = Device::with('user')->paginate(25);
+        $q = $request->get('q');
+
+        $devices = Device::with('user')
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('name', 'like', "%{$q}%")
+                        ->orWhere('serial', 'like', "%{$q}%")
+                        ->orWhere('ip', 'like', "%{$q}%")
+                        ->orWhereHas('user', function ($u) use ($q) {
+                            $u->where('email', 'like', "%{$q}%");
+                        });
+                });
+            })
+            ->paginate(25);
+
         return view('admin.devices.index', compact('devices'));
     }
 
