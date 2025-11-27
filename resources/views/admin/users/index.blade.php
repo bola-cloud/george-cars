@@ -17,6 +17,7 @@
             <td>{{ $user->phone }}</td>
             <td>{{ $user->is_admin ? 'Yes' : 'No' }}</td>
             <td>
+                <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-sm btn-info">Show</a>
                 <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-sm btn-secondary">Edit</a>
                 <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" style="display:inline-block" onsubmit="return confirm('Delete user?')">
                     @csrf
