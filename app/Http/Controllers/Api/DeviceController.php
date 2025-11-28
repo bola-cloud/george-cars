@@ -119,12 +119,15 @@ class DeviceController extends Controller
             ], 404);
         }
 
-        $device->delete();
+        // Instead of deleting the device, unassign it from the user and clear the IP.
+        $device->user_id = null;
+        $device->ip = null;
+        $device->save();
 
         return response()->json([
-            'message' => 'Device deleted',
+            'message' => 'Device unassigned from user',
             'status' => true,
-            'data' => null,
+            'data' => $device,
         ], 200);
     }
 }
