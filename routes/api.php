@@ -56,5 +56,5 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Public API to get broker_ip
-    Route::get('settings/broker-ip', [\App\Http\Controllers\Api\SettingController::class, 'brokerIp']);
 });
+    Route::get('settings/broker-ip', [\App\Http\Controllers\Api\SettingController::class, 'brokerIp']);
