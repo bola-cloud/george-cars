@@ -32,6 +32,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('devices/{id}/edit', [WebDeviceController::class, 'edit'])->name('devices.edit');
     Route::match(['put','patch'], 'devices/{id}', [WebDeviceController::class, 'update'])->name('devices.update');
     Route::delete('devices/{id}', [WebDeviceController::class, 'destroy'])->name('devices.destroy');
+
+    // Settings
+    Route::get('settings', [\App\Http\Controllers\Admin\WebSettingController::class, 'show'])->name('settings.show');
+    Route::post('settings', [\App\Http\Controllers\Admin\WebSettingController::class, 'update'])->name('settings.update');
 });
 
 

@@ -54,4 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::match(['put','patch'], 'devices/{id}', [AdminDeviceController::class, 'update']);
         Route::delete('devices/{id}', [AdminDeviceController::class, 'destroy']);
     });
+
+    // Public API to get broker_ip
+    Route::get('settings/broker-ip', [\App\Http\Controllers\Api\SettingController::class, 'brokerIp']);
 });

@@ -157,6 +157,12 @@
                                 <span class="menu-title">{{ __('Devices') }}</span>
                             </a>
                         </li>
+                        <li class="nav-item {{ Request::routeIs('admin.settings.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.settings.show') }}">
+                                <i class="la la-cog"></i>
+                                <span class="menu-title">{{ __('Settings') }}</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
