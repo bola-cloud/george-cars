@@ -21,15 +21,15 @@ use App\Http\Controllers\Admin\DeviceController as AdminDeviceController;
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
+// Public device store route (no authentication required)
+Route::post('/devices', [DeviceController::class, 'store']);
+
 // Protected Routes (Require authentication)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
 
     // Update authenticated user
     Route::match(['put', 'patch'], '/user', [AuthController::class, 'update']);
-
-    // Create a device for authenticated user
-    Route::post('/devices', [DeviceController::class, 'store']);
     // Update a device (owned by authenticated user)
     Route::match(['put','patch'], '/devices/{id}', [DeviceController::class, 'update']);
     // Delete a device (only if it belongs to the authenticated user)

@@ -9,15 +9,16 @@ use Illuminate\Support\Facades\Validator;
 class DeviceController extends Controller
 {
     /**
-     * Store a new device for the authenticated user.
+     * Store a new device - no authentication required.
+     * Accepts user_id in request to assign device to a user.
      */
     public function store(Request $request)
     {
-        // Mobile claim mode: request must contain 'serial'. Optional: 'ip' and 'name' to update device on claim.
         $validator = Validator::make($request->all(), [
             'serial' => 'required|string|max:255',
             'ip' => 'required|ip',
             'name' => 'nullable|string|max:255',
+            'user_id' => 'required|exists:users,id',
         ]);
 
         if ($validator->fails()) {
@@ -40,21 +41,21 @@ class DeviceController extends Controller
             ], 404);
         }
 
-        if ($device->user_id && $device->user_id != $request->user()->id) {
+        if ($device->user_id && $device->user_id != $request->input('user_id')) {
             return response()->json([
-                'message' => 'Device already claimed',
+                'message' => 'Device already claimed by another user',
                 'status' => false,
                 'data' => null,
             ], 409);
         }
 
-        $device->user_id = $request->user()->id;
+        $device->user_id = $request->input('user_id');
         // Update name if provided
         if ($request->filled('name')) {
             $device->name = $request->input('name');
         }
-        // Use provided ip if present, otherwise use request IP
-        $device->ip = $request->input('ip', $request->ip());
+        // Use provided ip
+        $device->ip = $request->input('ip');
         $device->save();
 
         return response()->json([
