@@ -66,6 +66,20 @@ class DeviceController extends Controller
     }
 
     /**
+     * Generate a unique 14-character alphanumeric serial.
+     * Public endpoint (no auth required).
+     */
+    public function generateSerial()
+    {
+        try {
+            $serial = \App\Models\Device::generateUniqueSerial(14);
+            return response()->json(['serial' => $serial], 200);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => 'Unable to generate unique serial'], 500);
+        }
+    }
+
+    /**
      * Update a device belonging to the authenticated user.
      */
     public function update(Request $request, $id)
@@ -120,9 +134,10 @@ class DeviceController extends Controller
             ], 404);
         }
 
-        // Instead of deleting the device, unassign it from the user and clear the IP.
+        // Instead of deleting the device, unassign it from the user, clear the IP and serial.
         $device->user_id = null;
         $device->ip = null;
+        $device->serial = null;
         $device->save();
 
         return response()->json([

@@ -23,6 +23,8 @@ Route::post('login', [AuthController::class, 'login']);
 
 // Public device store route (no authentication required)
 Route::post('/devices', [DeviceController::class, 'store']);
+// Public endpoint to generate a unique 14-char alphanumeric serial
+Route::get('/devices/generate-serial', [DeviceController::class, 'generateSerial']);
 
 // Protected Routes (Require authentication)
 Route::middleware('auth:sanctum')->group(function () {
