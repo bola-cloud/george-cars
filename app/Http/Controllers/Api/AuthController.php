@@ -111,6 +111,7 @@ class AuthController extends Controller
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:255',
+            'onesignal' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
@@ -121,7 +122,7 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $data = $request->only(['name', 'email', 'phone']);
+        $data = $request->only(['name', 'email', 'phone', 'onesignal']);
 
         // If email is being updated, you may want to reset verification; left as-is for now.
         $user->update($data);

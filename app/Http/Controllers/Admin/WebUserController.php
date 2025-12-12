@@ -38,13 +38,14 @@ class WebUserController extends Controller
             'password' => 'required|string|min:8',
             'phone' => 'nullable|string',
             'is_admin' => 'nullable|boolean',
+            'onesignal' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $data = $request->only(['name','email','phone','is_admin']);
+        $data = $request->only(['name','email','phone','is_admin','onesignal']);
         $data['password'] = Hash::make($request->password);
         User::create($data);
 
@@ -73,13 +74,14 @@ class WebUserController extends Controller
             'password' => 'sometimes|nullable|string|min:8',
             'phone' => 'nullable|string',
             'is_admin' => 'nullable|boolean',
+            'onesignal' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $data = $request->only(['name','email','phone','is_admin']);
+        $data = $request->only(['name','email','phone','is_admin','onesignal']);
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }

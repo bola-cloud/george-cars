@@ -33,13 +33,14 @@ class UserController extends Controller
             'password' => 'required|string|min:8',
             'phone' => 'nullable|string',
             'is_admin' => 'nullable|boolean',
+            'onesignal' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['message' => 'Validation errors','status' => false,'data' => $validator->errors()], 422);
         }
 
-        $data = $request->only(['name','email','phone','is_admin']);
+        $data = $request->only(['name','email','phone','is_admin','onesignal']);
         $data['password'] = Hash::make($request->password);
         $user = User::create($data);
 
@@ -59,13 +60,14 @@ class UserController extends Controller
             'password' => 'sometimes|nullable|string|min:8',
             'phone' => 'nullable|string',
             'is_admin' => 'nullable|boolean',
+            'onesignal' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['message' => 'Validation errors','status' => false,'data' => $validator->errors()], 422);
         }
 
-        $data = $request->only(['name','email','phone','is_admin']);
+        $data = $request->only(['name','email','phone','is_admin','onesignal']);
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }

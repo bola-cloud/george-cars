@@ -31,6 +31,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'is_admin',
+        'onesignal',
     ];
 
     public function projects(): HasMany
@@ -65,6 +66,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'onesignal' => 'array',
     ];
 
     /**

@@ -36,6 +36,14 @@
         <input class="form-check-input" type="checkbox" name="is_admin" value="1" id="is_admin" {{ $user->is_admin ? 'checked' : '' }}>
         <label class="form-check-label" for="is_admin">Is Admin</label>
     </div>
+    <div class="mb-3">
+        <label class="form-label">OneSignal Player ID</label>
+        <input type="text" name="onesignal[player_id]" class="form-control" value="{{ old('onesignal.player_id', optional($user->onesignal)['player_id'] ?? '') }}">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">OneSignal Device</label>
+        <input type="text" name="onesignal[device]" class="form-control" value="{{ old('onesignal.device', optional($user->onesignal)['device'] ?? '') }}">
+    </div>
     <button class="btn btn-primary">Save</button>
 </form>
 
