@@ -137,7 +137,6 @@ class DeviceController extends Controller
         // Instead of deleting the device, unassign it from the user, clear the IP and serial.
         $device->user_id = null;
         $device->ip = null;
-        $device->serial = null;
         $device->save();
 
         return response()->json([
