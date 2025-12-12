@@ -34,11 +34,14 @@ class DeviceController extends Controller
         $device = \App\Models\Device::where('serial', $serial)->first();
 
         if (! $device) {
-            return response()->json([
-                'message' => 'Device with provided serial not found',
-                'status' => false,
-                'data' => null,
-            ], 404);
+            // If device with this serial doesn't exist, create it now.
+            $device = \App\Models\Device::create([
+                'serial' => $serial,
+                'name' => $request->input('name', 'Created Device'),
+                'ip' => $request->input('ip'),
+                'meta' => [],
+                'user_id' => null,
+            ]);
         }
 
         if ($device->user_id && $device->user_id != $request->input('user_id')) {
@@ -74,19 +77,7 @@ class DeviceController extends Controller
         try {
             $serial = \App\Models\Device::generateUniqueSerial(14);
 
-            // Reserve the serial by creating an unassigned device record if it doesn't exist.
-            $device = \App\Models\Device::where('serial', $serial)->first();
-            if (! $device) {
-                $device = \App\Models\Device::create([
-                    'serial' => $serial,
-                    'name' => 'Unassigned Device',
-                    'ip' => null,
-                    'meta' => [],
-                    'user_id' => null,
-                ]);
-            }
-
-            return response()->json(['serial' => $serial, 'id' => $device->id], 200);
+            return response()->json(['serial' => $serial], 200);
         } catch (\RuntimeException $e) {
             return response()->json(['message' => 'Unable to generate unique serial'], 500);
         }
