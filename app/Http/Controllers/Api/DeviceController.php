@@ -71,26 +71,22 @@ class DeviceController extends Controller
      */
     public function generateSerial()
     {
-        // First try to reuse an existing unassigned device's serial
-        $device = \App\Models\Device::whereNull('user_id')->whereNotNull('serial')->first();
-
-        if ($device) {
-            return response()->json(['serial' => $device->serial, 'from_existing' => true], 200);
-        }
-
-        // No unassigned device with a serial found — generate a new unique serial and create an unassigned device record for it.
         try {
             $serial = \App\Models\Device::generateUniqueSerial(14);
 
-            // Create a placeholder device row so the serial exists in the DB (name is required by migration)
-            \App\Models\Device::create([
-                'name' => 'Auto device ' . substr($serial, -6),
-                'serial' => $serial,
-                'ip' => null,
-                'user_id' => null,
-            ]);
+            // Reserve the serial by creating an unassigned device record if it doesn't exist.
+            $device = \App\Models\Device::where('serial', $serial)->first();
+            if (! $device) {
+                $device = \App\Models\Device::create([
+                    'serial' => $serial,
+                    'name' => 'Unassigned Device',
+                    'ip' => null,
+                    'meta' => [],
+                    'user_id' => null,
+                ]);
+            }
 
-            return response()->json(['serial' => $serial, 'from_existing' => false], 200);
+            return response()->json(['serial' => $serial, 'id' => $device->id], 200);
         } catch (\RuntimeException $e) {
             return response()->json(['message' => 'Unable to generate unique serial'], 500);
         }
