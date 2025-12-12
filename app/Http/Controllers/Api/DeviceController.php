@@ -11,7 +11,7 @@ class DeviceController extends Controller
     /**
      * Store a new device - no authentication required.
      * Accepts user_id in request to assign device to a user.
-     */
+    */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -34,14 +34,11 @@ class DeviceController extends Controller
         $device = \App\Models\Device::where('serial', $serial)->first();
 
         if (! $device) {
-            // If device with this serial doesn't exist, create it now.
-            $device = \App\Models\Device::create([
-                'serial' => $serial,
-                'name' => $request->input('name', 'Created Device'),
-                'ip' => $request->input('ip'),
-                'meta' => [],
-                'user_id' => null,
-            ]);
+            return response()->json([
+                'message' => 'Device with provided serial not found',
+                'status' => false,
+                'data' => null,
+            ], 404);
         }
 
         if ($device->user_id && $device->user_id != $request->input('user_id')) {
@@ -76,7 +73,6 @@ class DeviceController extends Controller
     {
         try {
             $serial = \App\Models\Device::generateUniqueSerial(14);
-
             return response()->json(['serial' => $serial], 200);
         } catch (\RuntimeException $e) {
             return response()->json(['message' => 'Unable to generate unique serial'], 500);
