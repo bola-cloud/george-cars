@@ -77,13 +77,38 @@ class AuthController extends Controller
      */
     public function me(Request $request)
     {
-        $user = $request->user()->load('devices');
+        $user = $request->user();
+
+        // own devices
+        $ownDevices = $user->devices()->get()->map(function ($d) {
+            $arr = $d->toArray();
+            $arr['shared'] = false;
+            $arr['shared_owner_id'] = null;
+            $arr['shared_owner_name'] = null;
+            return $arr;
+        })->values();
+
+        // devices shared to this user by owners
+        $sharedDevicesQuery = $user->sharedDevices();
+        $sharedDevices = [];
+        if ($sharedDevicesQuery) {
+            $sharedDevices = $sharedDevicesQuery->with('user')->get()->map(function ($d) {
+                $arr = $d->toArray();
+                $arr['shared'] = true;
+                $arr['shared_owner_id'] = $d->user ? $d->user->id : null;
+                $arr['shared_owner_name'] = $d->user ? $d->user->name : null;
+                return $arr;
+            })->values();
+        }
+
+        $devices = $ownDevices->concat($sharedDevices)->values();
 
         return response()->json([
             'message' => 'User retrieved',
             'status' => true,
             'data' => [
                 'user' => $user,
+                'devices' => $devices,
             ],
         ], 200);
     }

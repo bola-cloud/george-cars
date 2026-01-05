@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DeviceController;
+use App\Http\Controllers\Api\ShareController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\DeviceController as AdminDeviceController;
 
@@ -29,6 +30,11 @@ Route::get('/devices/generate-serial', [DeviceController::class, 'generateSerial
 // Protected Routes (Require authentication)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
+
+    // Shares (parent -> child user mapping)
+    Route::get('shares', [ShareController::class, 'index']);
+    Route::post('shares', [ShareController::class, 'store']);
+    Route::delete('shares/{id}', [ShareController::class, 'destroy']);
 
     // Update authenticated user
     Route::match(['put', 'patch'], '/user', [AuthController::class, 'update']);
