@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('shares', [ShareController::class, 'index']);
     Route::post('shares', [ShareController::class, 'store']);
     Route::delete('shares/{id}', [ShareController::class, 'destroy']);
+    Route::patch('shares/{id}', [ShareController::class, 'update']);
 
     // Update authenticated user
     Route::match(['put', 'patch'], '/user', [AuthController::class, 'update']);
@@ -42,6 +43,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::match(['put','patch'], '/devices/{id}', [DeviceController::class, 'update']);
     // Delete a device (only if it belongs to the authenticated user)
     Route::delete('/devices/{id}', [DeviceController::class, 'destroy']);
+    // Notify users about device status change (owner + shared users)
+    Route::post('/devices/{id}/notify', [DeviceController::class, 'notifyChange']);
 
     // Logout route
     Route::post('logout', [AuthController::class, 'logout']);

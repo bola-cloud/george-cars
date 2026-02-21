@@ -53,7 +53,7 @@ class User extends Authenticatable
      */
     public function sharedUsers(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'user_shares', 'owner_id', 'user_id')->withTimestamps();
+        return $this->belongsToMany(User::class, 'user_shares', 'owner_id', 'user_id')->withTimestamps()->withPivot('meta');
     }
 
     /**
