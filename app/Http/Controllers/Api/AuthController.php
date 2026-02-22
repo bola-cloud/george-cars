@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserShare;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -89,14 +90,23 @@ class AuthController extends Controller
         })->values();
 
         // devices shared to this user by owners
+        // fetch owner->meta mapping from user_shares for this authenticated user
+        $ownerMeta = UserShare::where('user_id', $user->id)->get()->keyBy('owner_id');
+
         $sharedDevicesQuery = $user->sharedDevices();
         $sharedDevices = [];
         if ($sharedDevicesQuery) {
-            $sharedDevices = $sharedDevicesQuery->with('user')->get()->map(function ($d) {
+            $sharedDevices = $sharedDevicesQuery->with('user')->get()->map(function ($d) use ($ownerMeta) {
                 $arr = $d->toArray();
                 $arr['shared'] = true;
                 $arr['shared_owner_id'] = $d->user ? $d->user->id : null;
                 $arr['shared_owner_name'] = $d->user ? $d->user->name : null;
+                // attach share_meta from pivot (owner->this user)
+                $meta = null;
+                if ($d->user && isset($ownerMeta[$d->user->id])) {
+                    $meta = $ownerMeta[$d->user->id]->meta;
+                }
+                $arr['share_meta'] = $meta;
                 return $arr;
             })->values();
         }
