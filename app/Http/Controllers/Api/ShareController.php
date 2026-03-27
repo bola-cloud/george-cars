@@ -15,12 +15,65 @@ class ShareController extends Controller
      */
     public function index(Request $request)
     {
-        $user = $request->user();
-        // return user_shares rows with related user and meta
-        $query = UserShare::where('owner_id', $user->id)->with('user');
-        $shared = $query->paginate(20);
+        $owner = $request->user();
 
-        return response()->json([ 'message' => 'Shared users', 'status' => true, 'data' => $shared ], 200);
+        // Get all users this owner has shared with
+        $userShares = UserShare::where('owner_id', $owner->id)->with('user')->get();
+
+        // Get devices owned by owner
+        $devices = \App\Models\Device::where('user_id', $owner->id)->get();
+        $deviceIds = $devices->pluck('id')->toArray();
+
+        // Preload all device_shares for these devices and shared users
+        $sharedUserIds = $userShares->pluck('user_id')->toArray();
+        $deviceShares = [];
+        if (! empty($deviceIds) && ! empty($sharedUserIds)) {
+            $deviceShares = \App\Models\DeviceShare::whereIn('device_id', $deviceIds)
+                ->whereIn('user_id', $sharedUserIds)
+                ->get()
+                ->groupBy('user_id');
+        }
+
+        // Build response: for each shared user, include devices with effective meta
+        $result = [];
+        foreach ($userShares as $us) {
+            $row = [
+                'user_id' => $us->user_id,
+                'user' => $us->user,
+                'devices' => [],
+            ];
+
+            // for each device owned by owner, compute effective meta for this shared user
+            foreach ($devices as $dev) {
+                $effectiveMeta = null;
+
+                // device-specific meta if exists
+                if (isset($deviceShares[$us->user_id])) {
+                    $dsForUser = $deviceShares[$us->user_id]->keyBy('device_id');
+                    if (isset($dsForUser[$dev->id])) {
+                        $effectiveMeta = $dsForUser[$dev->id]->meta;
+                    }
+                }
+
+                // fallback to owner-level share meta (applies to all devices unless overridden)
+                if (is_null($effectiveMeta) && ! empty($us->meta)) {
+                    $effectiveMeta = $us->meta;
+                }
+
+                // only include device if there is some meta/permission defined
+                if (! is_null($effectiveMeta)) {
+                    $row['devices'][] = [
+                        'device_id' => $dev->id,
+                        'serial' => $dev->serial,
+                        'permissions' => $effectiveMeta['permissions'] ?? $effectiveMeta,
+                    ];
+                }
+            }
+
+            $result[] = $row;
+        }
+
+        return response()->json(['message' => 'Shared users', 'status' => true, 'data' => $result], 200);
     }
 
     /**

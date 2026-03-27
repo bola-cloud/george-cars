@@ -45,6 +45,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/devices/{id}', [DeviceController::class, 'destroy']);
     // Notify users about device status change (owner + shared users)
     Route::post('/devices/{id}/notify', [DeviceController::class, 'notifyChange']);
+    
+    // Device-level share management
+    Route::post('/device-shares', [\App\Http\Controllers\Api\DeviceShareController::class, 'store']);
+    Route::patch('/device-shares/{id}', [\App\Http\Controllers\Api\DeviceShareController::class, 'update']);
+    Route::delete('/device-shares/{id}', [\App\Http\Controllers\Api\DeviceShareController::class, 'destroy']);
 
     // Logout route
     Route::post('logout', [AuthController::class, 'logout']);

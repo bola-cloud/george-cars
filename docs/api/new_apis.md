@@ -1,173 +1,153 @@
-# New API Endpoints
+# New API Endpoints — sharing, per-device permissions, and notifications
 
-This document describes the APIs recently added to support account sharing and related behavior. All API endpoints below require authentication unless noted otherwise. Use Bearer token (Sanctum) in `Authorization` header.
+This document describes the APIs that manage account sharing, per-share permissions (`meta`), and related behavior. All API endpoints below require authentication unless noted otherwise. Use Bearer token (Sanctum) in the `Authorization` header.
 
-## Authentication
+Authentication
 - Header: `Authorization: Bearer <token>`
 
----
+Overview
+- Sharing is modelled with two pivot tables:
+  - `user_shares (owner_id, user_id, meta)` — owner-level shares that apply to all owner's devices unless overridden.
+  - `device_shares (device_id, user_id, meta)` — per-device shares that override owner-level `meta` for that device.
+- The APIs prefer device-level `meta` when available and fall back to owner-level `user_shares.meta`.
 
-## 1) List shared users
-
+1) List shared users (grouped, per-device)
 - Method: `GET`
 - Path: `/api/shares`
 - Auth: required
 
-Request: none (apart from auth)
+Description
+- Returns a compact grouped list: for each user the authenticated owner has shared with, the response lists only the owner's devices that the shared user has access to along with effective permissions for each device.
 
-Successful response (200):
+Effective permissions resolution
+1. If a `device_shares` row exists for (device_id, user_id), use its `meta` (device-level permissions).
+2. Otherwise, if an owner-level `user_shares.meta` exists for that user, use it as a fallback (applies to all devices unless overridden).
+3. If neither exists, the device is excluded for that user.
+
+Response example (200):
 
 ```
 {
   "message": "Shared users",
   "status": true,
-  "data": {
-    // paginated users (page, per_page etc.)
-  }
+  "data": [
+    {
+      "user_id": 23,
+      "user": { /* user object */ },
+      "devices": [
+        { "device_id": 2, "serial": "GEC...", "permissions": { "can_open": true, "can_close": true } },
+        { "device_id": 5, "serial": "ESP...", "permissions": { "can_open": true, "can_close": false } }
+      ]
+    },
+    {
+      "user_id": 42,
+      "user": { /* user object */ },
+      "devices": [
+        { "device_id": 3, "serial": "XYZ...", "permissions": { "can_view": true } }
+      ]
+    }
+  ]
 }
 ```
 
----
+Notes
+- The response is intentionally compact to minimize client requests — the mobile app can render a homepage with a single fetch.
 
-## 2) Share account with one or many users
-
+2) Share account with one or many users (create shares)
 - Method: `POST`
 - Path: `/api/shares`
-- Auth: required
+- Auth: required (owner only)
 
-You may provide either singular fields or arrays. At least one identifier is required.
+Request body
+- Provide at least one identifier: `email`, `phone`, or arrays `emails`, `phones`.
+- Optional: `meta` — an object stored on the `user_shares` row and used as the default permissions for that shared user.
 
-Request body examples (JSON):
+Examples
+- Single email
 
-- Single email:
+```
+{ "email": "child@example.com" }
+```
+
+- Multiple recipients with shared `meta`
 
 ```
 {
-  "email": "child@example.com"
+  "emails": ["a@example.com","b@example.com"],
+  "meta": { "permissions": { "can_view": true, "can_control": false } }
 }
 ```
 
-- Single phone:
+Responses
+- Success (201): returns `shared` (found & attached users), `not_found`, and `self_skipped` arrays.
+- If no target users are matched the endpoint returns 404 with `not_found`.
 
-```
-{
-  "phone": "+1234567890"
-}
-```
-
-- Multiple recipients (emails and/or phones):
-
-```
-{
-  "emails": ["a@example.com", "b@example.com"],
-  "phones": ["+111111111", "+222222222"]
-}
-```
-
-Validation errors (422): missing both email/phone or invalid formats.
-
-Possible responses:
-
-- Success (201):
-
-```
-{
-  "message": "Users shared",
-  "status": true,
-  "data": {
-    "shared": [ /* array of user objects that were found & attached */ ],
-    "not_found": [ /* array of identifiers not matched: {email:..} or {phone:..} */ ],
-    "self_skipped": [ /* any skipped because owner tried to share with themselves (ids) */ ]
-  }
-}
-```
-
-- No matched targets (404):
-
-```
-{
-  "message": "No target users found",
-  "status": false,
-  "data": { "not_found": [ /* ... */ ] }
-}
-```
-
-### `meta` (permissions)
-
-You may include an optional `meta` object in the `POST /api/shares` body to apply the same permissions metadata to every share created in that request. The server stores `meta` as JSON on the `user_shares` pivot row.
-
-Suggested permission schema (example):
-
-```
-"meta": {
-  "can_view": true,
-  "can_control": false,
-  "can_notify": true
-}
-```
-
-Example request with `meta`:
-
-```
-{
-  "emails": ["child@example.com"],
-  "meta": { "can_view": true, "can_control": false }
-}
-```
-
-Note: `POST /api/shares` response's `shared` array returns the user objects that were attached. To inspect per-share `meta` values, use `GET /api/shares` which returns the `user_shares` rows including `meta` and the related `user`.
-
----
-
-## 3) Remove a share
-
+3) Remove a share (owner removes a child)
 - Method: `DELETE`
-- Path: `/api/shares/{id}`
-- Auth: required
-- Path param: `{id}` is the shared user's id (the child user)
+- Path: `/api/shares/{id}` — `{id}` is the child user's id (the `user_id` in the pivot)
+- Auth: required (owner only)
 
-Success (200):
-
-```
-{
-  "message": "Share removed",
-  "status": true,
-  "data": null
-}
-```
-
-Not found (404) if the share relation does not exist.
-
----
-
-### GET /api/shares (returned structure)
-
-The `GET /api/shares` endpoint returns paginated `user_shares` rows. Each item includes the pivot `meta` and the related `user` object. Example item:
+Response (200):
 
 ```
-{
-  "id": 55,                // user_shares id
-  "owner_id": 1,
-  "user_id": 23,
-  "meta": { "can_view": true, "can_control": false },
-  "created_at": "...",
-  "updated_at": "...",
-  "user": { /* user object for user_id 23 */ }
-}
+{ "message": "Share removed", "status": true, "data": null }
 ```
 
+4) Update an owner-level share (`user_shares`)
+- Method: `PATCH`
+- Path: `/api/shares/{id}` — `{id}` is the `user_shares` row id
+- Auth: required (owner only)
 
-## 4) Updated: Get current user (`me`) — devices merged with shared devices
+Request body examples
+- Update only `meta`:
 
+```
+{ "meta": { "permissions": { "can_view": true, "can_control": false } } }
+```
+
+- Change the target `user_id` (owner must ensure uniqueness):
+
+```
+{ "user_id": 78 }
+```
+
+Response (200): returns the updated `user_shares` row including `meta` and related `user`.
+
+5) Per-device shares — grant/revoke per-device access (`device_shares`)
+- Purpose: Use when you want to grant a child access to specific devices instead of all owner's devices, or to assign distinct permissions per device.
+
+- Create/update per-device share
+  - Method: `POST`
+  - Path: `/api/device-shares`
+  - Auth: required (owner only)
+  - Body: `{ "device_id": <id>, "user_id": <child_user_id>, "meta": { ... } }`
+
+Response (201): returns the created `device_shares` row.
+
+- Update an existing device share
+  - Method: `PATCH`
+  - Path: `/api/device-shares/{id}` — `{id}` is the `device_shares` row id
+  - Body: `{ "meta": { ... } }`
+
+- Delete a device share
+  - Method: `DELETE`
+  - Path: `/api/device-shares/{id}`
+
+Notes
+- The server prefers `device_shares.meta` when building effective permissions for a device; otherwise it falls back to `user_shares.meta`.
+
+6) Get current user (`me`) — merged devices with `share_meta`
 - Method: `GET`
 - Path: `/api/user`
 - Auth: required
 
-Behavior: the endpoint returns the authenticated user plus a `devices` array that combines:
-- user's own devices (flagged with `shared: false`)
-- devices owned by any users who shared with the authenticated user (flagged with `shared: true`)
+Description
+- Returns the authenticated user and a `devices` array that contains:
+  - the user's own devices (each with `shared: false`), and
+  - devices owned by other users who have shared with the authenticated user (each with `shared: true` and owner info).
+- Each shared device includes a `share_meta` field with the effective permissions for the authenticated user on that device (device-level meta preferred; otherwise owner-level meta).
 
-Device item example (fields merged from Device model with extras):
+Device example
 
 ```
 {
@@ -175,106 +155,60 @@ Device item example (fields merged from Device model with extras):
   "user_id": 45,           // owner id
   "name": "Tracker",
   "serial": "ABCD1234...",
-  "meta": { /* ... */ },
+  "meta": { /* device metadata */ },
   "ip": "1.2.3.4",
   "created_at": "...",
   "updated_at": "...",
-  // extras added by the API
   "shared": true,                // true if this device is shared to you
-  "shared_owner_id": 45,         // owner id (null for own devices)
-  "shared_owner_name": "Owner Name"
+  "shared_owner_id": 45,
+  "shared_owner_name": "Owner Name",
+  "share_meta": { "permissions": { "can_view": true } }
 }
 ```
 
 Response (200):
 
 ```
-{
-  "message": "User retrieved",
-  "status": true,
-  "data": {
-    "user": { /* user object */ },
-    "devices": [ /* array of device items as above */ ]
-  }
-}
+{ "message": "User retrieved", "status": true, "data": { "user": { /* user */ }, "devices": [ /* devices */ ] } }
 ```
 
----
-
-## 5) Update authenticated user (onesignal)
-
+7) Update authenticated user (persist OneSignal info)
 - Method: `PATCH` or `PUT`
 - Path: `/api/user`
 - Auth: required
 
-You can now send `onesignal` as an array/object to persist OneSignal information on the user record.
-
-Request body example:
+Body example to store OneSignal player id:
 
 ```
-{
-  "name": "New Name",
-  "onesignal": {
-    "player_id": "abcd1234",
-    "device": "android"
-  }
-}
+{ "onesignal": { "player_id": "abcd1234", "device": "android" } }
 ```
 
-Successful response (200): returns the updated user (and devices under `data.user` when applicable):
+Response (200): returns the updated user including the `onesignal` JSON stored on the user record.
 
-```
-{
-  "message": "User updated",
-  "status": true,
-  "data": {
-    "user": { /* user object with `onesignal` as array */ }
-  }
-}
-```
-
-Validation error (422) if `onesignal` is not an array/object.
-
----
-
-## 6) Notify device status change (OneSignal)
-
+8) Notify device status change (OneSignal)
 - Method: `POST`
 - Path: `/api/devices/{id}/notify`
 - Auth: required
-- Path param: `{id}` is the device id
 
-Use this endpoint to notify the device owner and all users that the owner has shared with (the shared users) about a device status change. It sends a OneSignal notification to recipients who have `onesignal.player_id` saved on their user records.
+Description
+- Notifies the device owner and all users the owner has shared with (recipients are deduplicated). Only the owner or a user the owner has shared with may call this endpoint for the device.
+- The server collects `onesignal.player_id` values from recipients and calls OneSignal with `include_player_ids`.
 
-Request body (JSON):
-
-```
-{
-  "status": "online|offline|alarm|...",    // required
-  "title": "Optional title",
-  "message": "Optional message to include"
-}
-```
-
-Behavior:
-- Only the device owner or a user that the owner has shared with may call this endpoint for the device (permission check).
-- The server gathers `player_id` from the owner and the owner's shared users and calls OneSignal API with `include_player_ids`.
-- OneSignal configuration must be present in environment or `services.php`:
-  - `ONESIGNAL_APP_ID` and `ONESIGNAL_REST_API_KEY` (or `services.onesignal.*` in config).
-
-Success (200):
+Request body
 
 ```
-{
-  "message": "Notifications sent",
-  "status": true,
-  "data": { /* OneSignal API response */ }
-}
+{ "status": "online|offline|alarm|...", "title": "Optional title", "message": "Optional message" }
 ```
 
-If no player IDs are found a 200 response is returned with a message indicating no players were available. If OneSignal is not configured a 500 is returned.
+Success (200): returns OneSignal API response or a message indicating there were no players to notify. If OneSignal is not configured a 500 is returned.
 
-Example cURL (replace <TOKEN> and <DEVICE_ID>):
+OneSignal configuration
+- Add to `.env`:
+  - `ONESIGNAL_APP_ID=...`
+  - `ONESIGNAL_REST_API_KEY=...`
+- Or set `services.onesignal` keys and run `php artisan config:clear`.
+
+Example cURL
 
 ```
 curl -X POST "http://localhost/api/devices/<DEVICE_ID>/notify" \
@@ -283,55 +217,19 @@ curl -X POST "http://localhost/api/devices/<DEVICE_ID>/notify" \
   -d '{"status":"alarm","title":"Device Alarm","message":"Your device triggered an alarm"}'
 ```
 
+Other API endpoints that involve `meta` or shared data
+- `POST|PATCH|DELETE /api/device-shares` — create/update/delete per-device shares (see section 5).
+- `POST /api/shares` supports a request-level `meta` that will be stored on each created `user_shares` row.
+- Admin device endpoints (`/admin/devices` create/update) accept `meta` for device records; admin UI and controllers persist device `meta`.
 
-Notes & recommendations
-- The `user_shares` table uses a composite unique key on (`owner_id`, `user_id`) to prevent duplicate share rows for the same owner/child pair.
-- If you want per-device sharing (granting a child access to specific devices rather than all owner's devices), we can add a `device_shares` pivot that links `device_id` to `user_id`.
-- Consider adding invitations for non-registered targets (store pending invites) if you want owners to share by email/phone before the target registers.
+Recommendations & next steps
+- If you currently have owner-level `user_shares.meta` and want per-device defaults, consider running a one-shot migration that copies owner-level `meta` into `device_shares` for each owner device (I can prepare this migration script).
+- Consider validating `meta.permissions` with an explicit schema if you want stricter enforcement (e.g., allowed keys and boolean values).
 
----
+Errors and validation
+- 422: validation errors (missing fields or invalid `meta` shapes).
+- 403: forbidden (attempt to manage shares or device-shares as a non-owner).
+- 404: not found (share or device not found).
 
-## PATCH /api/shares/{id} — Update a share's meta or target user
-
-- Method: `PATCH`
-- Path: `/api/shares/{id}`
-- Auth: required (owner only)
-- Path param: `{id}` is the `user_shares` row id
-
-Request body examples:
-
-Update permissions/meta only:
-
-```
-{
-  "meta": { "can_view": true, "can_control": false, "can_notify": true }
-}
-```
-
-Change the target user (owner must ensure uniqueness):
-
-```
-{
-  "user_id": 78
-}
-```
-
-Response (200): returns updated `user_shares` row (including `meta` and `user` relation):
-
-```
-{
-  "message": "Share updated",
-  "status": true,
-  "data": {
-    "id": 55,
-    "owner_id": 1,
-    "user_id": 78,
-    "meta": { "can_view": true, "can_control": false },
-    "created_at": "...",
-    "updated_at": "...",
-  }
-}
-```
-
-Validation (422) if invalid `meta` or `user_id`, 403 if caller is not the owner, 404 if share not found.
-
+Changes summary
+- The main documentation changes are: returning grouped per-user device lists in `GET /api/shares`, adding `share_meta` to devices returned by `GET /api/user`, and documenting `device_shares` for per-device permissions.

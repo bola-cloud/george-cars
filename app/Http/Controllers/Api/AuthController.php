@@ -96,17 +96,36 @@ class AuthController extends Controller
         $sharedDevicesQuery = $user->sharedDevices();
         $sharedDevices = [];
         if ($sharedDevicesQuery) {
-            $sharedDevices = $sharedDevicesQuery->with('user')->get()->map(function ($d) use ($ownerMeta) {
+            $sharedDevicesCollection = $sharedDevicesQuery->with('user')->get();
+
+            // collect device ids and query device_shares for this authenticated user in one query
+            $deviceIds = $sharedDevicesCollection->pluck('id')->toArray();
+            $deviceShareMap = [];
+            if (! empty($deviceIds)) {
+                $deviceShares = \App\Models\DeviceShare::whereIn('device_id', $deviceIds)
+                    ->where('user_id', $user->id)
+                    ->get()
+                    ->keyBy('device_id');
+                $deviceShareMap = $deviceShares->toArray();
+            }
+
+            $sharedDevices = $sharedDevicesCollection->map(function ($d) use ($ownerMeta, $deviceShareMap) {
                 $arr = $d->toArray();
                 $arr['shared'] = true;
                 $arr['shared_owner_id'] = $d->user ? $d->user->id : null;
                 $arr['shared_owner_name'] = $d->user ? $d->user->name : null;
-                // attach share_meta from pivot (owner->this user)
-                $meta = null;
-                if ($d->user && isset($ownerMeta[$d->user->id])) {
-                    $meta = $ownerMeta[$d->user->id]->meta;
+
+                // prefer device-level meta if present, otherwise fallback to owner->user meta
+                $shareMeta = null;
+                if (isset($deviceShareMap[$d->id]) && isset($deviceShareMap[$d->id]['meta'])) {
+                    $shareMeta = $deviceShareMap[$d->id]['meta'];
+                } else {
+                    if ($d->user && isset($ownerMeta[$d->user->id])) {
+                        $shareMeta = $ownerMeta[$d->user->id]->meta;
+                    }
                 }
-                $arr['share_meta'] = $meta;
+
+                $arr['share_meta'] = $shareMeta;
                 return $arr;
             })->values();
         }
