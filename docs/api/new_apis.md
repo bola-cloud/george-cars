@@ -35,15 +35,15 @@ Response example (200):
       "user_id": 23,
       "user": { /* user object */ },
       "devices": [
-        { "device_id": 2, "serial": "GEC...", "permissions": { "can_open": true, "can_close": true } },
-        { "device_id": 5, "serial": "ESP...", "permissions": { "can_open": true, "can_close": false } }
+        { "device_id": 2, "device_share_id": 14, "name": "Garage Door", "serial": "GEC...", "permissions": { "can_open": true, "can_close": true } },
+        { "device_id": 5, "device_share_id": null, "name": "Back Door", "serial": "ESP...", "permissions": { "can_open": true, "can_close": false } }
       ]
     },
     {
       "user_id": 42,
       "user": { /* user object */ },
       "devices": [
-        { "device_id": 3, "serial": "XYZ...", "permissions": { "can_view": true } }
+        { "device_id": 3, "device_share_id": 18, "name": "Front Gate", "serial": "XYZ...", "permissions": { "can_view": true } }
       ]
     }
   ]

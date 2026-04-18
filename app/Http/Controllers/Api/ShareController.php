@@ -46,12 +46,14 @@ class ShareController extends Controller
             // for each device owned by owner, compute effective meta for this shared user
             foreach ($devices as $dev) {
                 $effectiveMeta = null;
+                $deviceShareId = null;
 
                 // device-specific meta if exists
                 if (isset($deviceShares[$us->user_id])) {
                     $dsForUser = $deviceShares[$us->user_id]->keyBy('device_id');
                     if (isset($dsForUser[$dev->id])) {
                         $effectiveMeta = $dsForUser[$dev->id]->meta;
+                        $deviceShareId = $dsForUser[$dev->id]->id;
                     }
                 }
 
@@ -64,6 +66,8 @@ class ShareController extends Controller
                 if (! is_null($effectiveMeta)) {
                     $row['devices'][] = [
                         'device_id' => $dev->id,
+                        'device_share_id' => $deviceShareId,
+                        'name' => $dev->name,
                         'serial' => $dev->serial,
                         'permissions' => $effectiveMeta['permissions'] ?? $effectiveMeta,
                     ];
