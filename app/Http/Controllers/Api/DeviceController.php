@@ -87,11 +87,38 @@ class DeviceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $device = $request->user()->devices()->where('id', $id)->first();
+        $authUser = $request->user();
+        $device = Device::with('user')->find($id);
 
         if (! $device) {
             return response()->json([
-                'message' => 'Device not found or not owned by user',
+                'message' => 'Device not found',
+                'status' => false,
+                'data' => null,
+            ], 404);
+        }
+
+        // Owner can always update.
+        $isOwner = (int) $device->user_id === (int) $authUser->id;
+
+        // Shared user can update only when this device is effectively shared to them:
+        // device-level share first, then owner-level share fallback.
+        $isSharedWithUser = false;
+        if (! $isOwner && $device->user_id) {
+            $hasDeviceShare = \App\Models\DeviceShare::where('device_id', $device->id)
+                ->where('user_id', $authUser->id)
+                ->exists();
+
+            $hasOwnerShare = \App\Models\UserShare::where('owner_id', $device->user_id)
+                ->where('user_id', $authUser->id)
+                ->exists();
+
+            $isSharedWithUser = $hasDeviceShare || $hasOwnerShare;
+        }
+
+        if (! $isOwner && ! $isSharedWithUser) {
+            return response()->json([
+                'message' => 'Device not found or not shared with user',
                 'status' => false,
                 'data' => null,
             ], 404);

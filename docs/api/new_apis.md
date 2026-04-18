@@ -217,6 +217,48 @@ curl -X POST "http://localhost/api/devices/<DEVICE_ID>/notify" \
   -d '{"status":"alarm","title":"Device Alarm","message":"Your device triggered an alarm"}'
 ```
 
+9) Update device (owner or shared user)
+- Method: `PUT` or `PATCH`
+- Path: `/api/devices/{id}`
+- Auth: required
+
+Description
+- The endpoint now allows:
+  - device owner, or
+  - a shared user if the device is effectively shared with them.
+- Effective shared check:
+  1. `device_shares` exists for `(device_id, auth_user_id)`, or
+  2. owner-level `user_shares` exists for `(owner_id, auth_user_id)`.
+
+Request body
+
+```
+{
+  "name": "Gate 1",
+  "meta": {
+    "type": "SLIDING_GATE",
+    "presets": [
+      { "id": "1774431904267", "name": "20", "command": "down", "delayMs": 3900, "stopCommand": "stop" }
+    ]
+  },
+  "ip": "192.168.1.20"
+}
+```
+
+Success (200):
+
+```
+{
+  "message": "Device updated",
+  "status": true,
+  "data": { /* updated device */ }
+}
+```
+
+Not found (404):
+- `Device not found` if id is invalid.
+- `Device not found or not shared with user` if caller is neither owner nor shared user.
+
 Other API endpoints that involve `meta` or shared data
 - `POST|PATCH|DELETE /api/device-shares` — create/update/delete per-device shares (see section 5).
 - `POST /api/shares` supports a request-level `meta` that will be stored on each created `user_shares` row.
