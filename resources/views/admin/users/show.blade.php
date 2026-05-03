@@ -165,4 +165,89 @@
     </div>
 </div>
 
+<div class="content-header row mt-5 mb-3">
+    <div class="col-12">
+        <h3 class="content-header-title mb-0" style="font-weight:700; color:#1e293b;">Device Sharing Permissions</h3>
+        <p class="text-muted mt-1">Manage explicit device shares for this user based on the newest API logic.</p>
+    </div>
+</div>
+
+<div class="card modern-card">
+    <div class="card-header border-bottom d-flex align-items-center">
+        <div class="info-section-icon blue" style="background:#eff6ff; color:#2563eb;"><i class="la la-mobile-phone"></i></div>
+        <div>
+            <h4 class="card-title">Specific Device Shares (device_shares)</h4>
+            <p class="text-muted small mt-1 mb-0">Manage permissions for devices shared specifically with targeted users.</p>
+        </div>
+    </div>
+    <div class="card-content">
+        <div class="table-responsive">
+            <table class="table modern-table">
+                <thead>
+                    <tr>
+                        <th style="width:20%;">Resource (Device)</th>
+                        <th style="width:20%;">Shared With User</th>
+                        <th>Explicit Features / Permissions</th>
+                        <th class="text-center" style="width:120px;">Control</th>
+                    </tr>
+                </thead>
+                <tbody>
+            @forelse($deviceShares as $dShare)
+                <tr>
+                    <td class="align-middle">
+                        <div class="font-weight-bold text-dark" style="font-size:1rem;">{{ $dShare->device->name ?? 'Unknown' }}</div>
+                        <div class="text-muted small mt-50">Device ID: #{{ $dShare->device_id }}</div>
+                    </td>
+                    <td class="align-middle">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-circle" style="background:#f1f5f9; color:#475569; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; margin-right:15px;">
+                                <i class="la la-user"></i>
+                            </div>
+                            <div>
+                                <div class="font-weight-bold text-dark">{{ $dShare->user->name ?? 'Unknown' }}</div>
+                                <div class="text-muted small mt-50">Target ID: #{{ $dShare->user_id }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="align-middle">
+                        @php
+                            $perms = $dShare->meta['permissions'] ?? [];
+                            $allPerms = ['can_open', 'can_stop', 'can_close', 'can_delete', 'can_rename', 'can_schedule', 'can_change_type', 'can_manage_presets'];
+                        @endphp
+                        <form action="{{ route('admin.device_shares.update', $dShare->id) }}" method="POST" style="margin:0;">
+                            @csrf
+                            @method('PUT')
+                            <div class="row pt-2 pb-1 bg-light rounded px-2" style="border: 1px solid #f1f5f9;">
+                                @foreach($allPerms as $p)
+                                <div class="col-md-3 mb-2">
+                                    <div class="custom-control custom-switch custom-control-inline">
+                                        <input type="hidden" name="permissions[{{ $p }}]" value="0">
+                                        <input class="custom-control-input" type="checkbox" name="permissions[{{ $p }}]" value="1" id="dShare_{{$dShare->id}}_{{$p}}" {{ isset($perms[$p]) && $perms[$p] ? 'checked' : '' }}>
+                                        <label class="custom-control-label font-weight-bold text-secondary" style="font-size: 0.80rem;" for="dShare_{{$dShare->id}}_{{$p}}">{{ ucfirst(str_replace('can_', '', $p)) }}</label>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                            <div class="mt-2">
+                                <button type="submit" class="btn btn-sm btn-white modern-btn modern-badge-info"><i class="la la-save"></i> Save Rules</button>
+                            </div>
+                        </form>
+                    </td>
+                    <td class="text-center align-middle">
+                        <form method="POST" action="{{ route('admin.device_shares.destroy', $dShare->id) }}" style="margin:0;" onsubmit="return confirm('Revoke this device share?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-white modern-btn modern-badge-danger"><i class="la la-ban"></i> Revoke</button>
+                        </form>
+                    </td>
+                </tr>
+            @empty
+                <tr><td colspan="4" class="text-center py-5 text-muted"><i class="la la-shield text-light" style="font-size:3rem; display:block; margin-bottom:10px;"></i>No specific device shares active.</td></tr>
+            @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 @endsection
