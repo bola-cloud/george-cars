@@ -2,72 +2,75 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <div>
-            <h4 class="mb-0">Users <small class="text-muted">({{ $users->total() }})</small></h4>
-            <div class="text-muted small">Manage application users</div>
-        </div>
-
-        <div class="d-flex align-items-center">
-            <form method="GET" action="{{ route('admin.users.index') }}" class="me-2">
-                <div class="input-group input-group-sm">
-                    <input type="search" name="q" class="form-control" placeholder="Search users by name, email or phone" value="{{ request('q') }}">
-                    <button class="btn btn-outline-secondary" type="submit">Search</button>
-                </div>
-            </form>
-            <a href="{{ route('admin.users.create') }}" class="btn btn-sm btn-primary">Create User</a>
+    <div class="card-header border-bottom">
+        <h4 class="card-title">Users <span class="badge badge-primary">{{ $users->total() }}</span></h4>
+        <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
+        <div class="heading-elements">
+            <div class="d-flex align-items-center">
+                <form method="GET" action="{{ route('admin.users.index') }}" class="mr-2 mb-0">
+                    <div class="input-group input-group-sm">
+                        <input type="search" name="q" class="form-control" placeholder="Search users by name, email or phone" value="{{ request('q') }}">
+                        <div class="input-group-append">
+                            <button class="btn btn-secondary" type="submit"><i class="la la-search"></i> Search</button>
+                        </div>
+                    </div>
+                </form>
+                <a href="{{ route('admin.users.create') }}" class="btn btn-sm btn-primary"><i class="la la-plus"></i> Create User</a>
+            </div>
         </div>
     </div>
 
-    <div class="card-body p-0">
+    <div class="card-content collapse show">
         <div class="table-responsive">
-            <table class="table table-hover table-sm mb-0">
-                <thead class="table-light">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="bg-light">
                     <tr>
                         <th style="width:64px">ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
-                        <th style="width:90px">Status</th>
-                        <th style="width:90px">Role</th>
-                        <th style="width:150px" class="text-center">Actions</th>
+                        <th style="width:100px">Status</th>
+                        <th style="width:110px">Role</th>
+                        <th style="width:160px" class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                 @foreach($users as $user)
                     <tr>
-                        <td class="align-middle">{{ $user->id }}</td>
-                        <td class="align-middle"><a href="{{ route('admin.users.show', $user->id) }}" class="fw-bold text-decoration-none">{{ $user->name }}</a></td>
-                        <td class="align-middle"><a href="mailto:{{ $user->email }}">{{ $user->email }}</a></td>
+                        <td class="align-middle text-muted">#{{ $user->id }}</td>
+                        <td class="align-middle">
+                            <a href="{{ route('admin.users.show', $user->id) }}" class="font-weight-bold">{{ $user->name }}</a>
+                        </td>
+                        <td class="align-middle"><a href="mailto:{{ $user->email }}" class="text-muted">{{ $user->email }}</a></td>
                         <td class="align-middle">{{ $user->phone ?? '-' }}</td>
                         <td class="align-middle">
                             @if($user->is_active)
-                                <span class="badge bg-success">Active</span>
+                                <span class="badge badge-success">Active</span>
                             @else
-                                <span class="badge bg-danger">Suspended</span>
+                                <span class="badge badge-danger">Suspended</span>
                             @endif
                         </td>
                         <td class="align-middle">
                             @if($user->is_admin)
-                                <span class="badge bg-primary">Admin</span>
+                                <span class="badge badge-info">Administrator</span>
                             @else
-                                <span class="badge bg-secondary">User</span>
+                                <span class="badge badge-secondary">User</span>
                             @endif
                         </td>
                         <td class="align-middle text-center">
-                            <div class="btn-group shadow-sm" role="group" aria-label="actions">
-                                <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-sm btn-outline-info" title="Show"><i class="fas fa-eye"></i></a>
-                                <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="fas fa-edit"></i></a>
-                                <form method="POST" action="{{ route('admin.users.toggleActive', $user->id) }}" style="display:inline-block">
+                            <div class="btn-group" role="group">
+                                <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-sm btn-info" title="Show"><i class="la la-eye"></i></a>
+                                <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-sm btn-secondary" title="Edit"><i class="la la-pencil"></i></a>
+                                <form method="POST" action="{{ route('admin.users.toggleActive', $user->id) }}" style="display:inline-block; margin:0;">
                                     @csrf
-                                    <button class="btn btn-sm {{ $user->is_active ? 'btn-outline-warning' : 'btn-outline-success' }}" title="{{ $user->is_active ? 'Suspend' : 'Activate' }}">
-                                        <i class="fas {{ $user->is_active ? 'fa-ban' : 'fa-check' }}"></i>
+                                    <button class="btn btn-sm {{ $user->is_active ? 'btn-warning' : 'btn-success' }}" title="{{ $user->is_active ? 'Suspend' : 'Activate' }}">
+                                        <i class="la {{ $user->is_active ? 'la-ban' : 'la-check' }}"></i>
                                     </button>
                                 </form>
-                                <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" style="display:inline-block" onsubmit="return confirm('Delete user?')">
+                                <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" style="display:inline-block; margin:0;" onsubmit="return confirm('Delete user?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                                    <button class="btn btn-sm btn-danger" title="Delete"><i class="la la-trash"></i></button>
                                 </form>
                             </div>
                         </td>
@@ -78,12 +81,13 @@
         </div>
     </div>
 
+    @if($users->hasPages())
     <div class="card-footer d-flex justify-content-between align-items-center">
         <div class="small text-muted">Showing {{ $users->firstItem() ?? 0 }} - {{ $users->lastItem() ?? 0 }} of {{ $users->total() }}</div>
         <div>
-            {{ $users->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
+            {{ $users->appends(request()->except('page'))->links('pagination::bootstrap-4') }}
         </div>
     </div>
+    @endif
 </div>
-
 @endsection
