@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 use App\Http\Controllers\Admin\WebUserController;
 use App\Http\Controllers\Admin\WebDeviceController;
+use App\Http\Controllers\Admin\WebShareController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +21,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('users/create', [WebUserController::class, 'create'])->name('users.create');
     Route::post('users', [WebUserController::class, 'store'])->name('users.store');
     Route::get('users/{id}', [WebUserController::class, 'show'])->name('users.show');
+    Route::post('users/{id}/toggle-active', [WebUserController::class, 'toggleActive'])->name('users.toggleActive');
     Route::get('users/{id}/edit', [WebUserController::class, 'edit'])->name('users.edit');
     Route::match(['put','patch'], 'users/{id}', [WebUserController::class, 'update'])->name('users.update');
     Route::delete('users/{id}', [WebUserController::class, 'destroy'])->name('users.destroy');
@@ -36,6 +38,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Settings
     Route::get('settings', [\App\Http\Controllers\Admin\WebSettingController::class, 'show'])->name('settings.show');
     Route::post('settings', [\App\Http\Controllers\Admin\WebSettingController::class, 'update'])->name('settings.update');
+
+    // Shares
+    Route::match(['put', 'patch'], 'user-shares/{id}', [WebShareController::class, 'updateUserShare'])->name('user_shares.update');
+    Route::delete('user-shares/{id}', [WebShareController::class, 'destroyUserShare'])->name('user_shares.destroy');
+    Route::match(['put', 'patch'], 'device-shares/{id}', [WebShareController::class, 'updateDeviceShare'])->name('device_shares.update');
+    Route::delete('device-shares/{id}', [WebShareController::class, 'destroyDeviceShare'])->name('device_shares.destroy');
 });
 
 

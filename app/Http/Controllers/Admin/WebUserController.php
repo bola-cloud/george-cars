@@ -38,6 +38,7 @@ class WebUserController extends Controller
             'password' => 'required|string|min:8',
             'phone' => 'nullable|string',
             'is_admin' => 'nullable|boolean',
+            'is_active' => 'nullable|boolean',
             'onesignal' => 'nullable|array',
         ]);
 
@@ -45,7 +46,9 @@ class WebUserController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $data = $request->only(['name','email','phone','is_admin','onesignal']);
+        $data = $request->only(['name','email','phone','onesignal']);
+        $data['is_admin'] = $request->has('is_admin');
+        $data['is_active'] = $request->has('is_active');
         $data['password'] = Hash::make($request->password);
         User::create($data);
 
@@ -61,7 +64,11 @@ class WebUserController extends Controller
     public function show($id)
     {
         $user = User::with('devices')->findOrFail($id);
-        return view('admin.users.show', compact('user'));
+
+        $userShares = \App\Models\UserShare::where('owner_id', $id)->with('user')->get();
+        $deviceShares = \App\Models\DeviceShare::whereIn('device_id', $user->devices->pluck('id'))->with(['user', 'device'])->get();
+
+        return view('admin.users.show', compact('user', 'userShares', 'deviceShares'));
     }
 
     public function update(Request $request, $id)
@@ -74,6 +81,7 @@ class WebUserController extends Controller
             'password' => 'sometimes|nullable|string|min:8',
             'phone' => 'nullable|string',
             'is_admin' => 'nullable|boolean',
+            'is_active' => 'nullable|boolean',
             'onesignal' => 'nullable|array',
         ]);
 
@@ -81,7 +89,12 @@ class WebUserController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $data = $request->only(['name','email','phone','is_admin','onesignal']);
+        $data = $request->only(['name','email','phone','onesignal']);
+        
+        // Handle boolean fields
+        $data['is_admin'] = $request->has('is_admin');
+        $data['is_active'] = $request->has('is_active');
+
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
@@ -89,6 +102,21 @@ class WebUserController extends Controller
         $user->update($data);
 
         return redirect()->route('admin.users.index')->with('success', 'User updated');
+    }
+
+    public function toggleActive($id)
+    {
+        $user = User::findOrFail($id);
+        $user->is_active = !$user->is_active;
+        $user->save();
+
+        if (!$user->is_active) {
+            // Revoke all tokens so the user is logged out everywhere immediately
+            $user->tokens()->delete();
+        }
+
+        $status = $user->is_active ? 'activated' : 'suspended';
+        return redirect()->back()->with('success', "User account {$status} successfully.");
     }
 
     public function destroy($id)

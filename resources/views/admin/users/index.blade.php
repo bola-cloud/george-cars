@@ -28,8 +28,9 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
-                        <th style="width:90px">Admin</th>
-                        <th style="width:220px">Actions</th>
+                        <th style="width:90px">Status</th>
+                        <th style="width:90px">Role</th>
+                        <th style="width:150px" class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,20 +41,33 @@
                         <td class="align-middle"><a href="mailto:{{ $user->email }}">{{ $user->email }}</a></td>
                         <td class="align-middle">{{ $user->phone ?? '-' }}</td>
                         <td class="align-middle">
+                            @if($user->is_active)
+                                <span class="badge bg-success">Active</span>
+                            @else
+                                <span class="badge bg-danger">Suspended</span>
+                            @endif
+                        </td>
+                        <td class="align-middle">
                             @if($user->is_admin)
-                                <span class="badge bg-success">Admin</span>
+                                <span class="badge bg-primary">Admin</span>
                             @else
                                 <span class="badge bg-secondary">User</span>
                             @endif
                         </td>
-                        <td class="align-middle">
-                            <div class="btn-group" role="group" aria-label="actions">
-                                <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-sm btn-outline-info" title="Show"><i class="la la-eye"></i></a>
-                                <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="la la-edit"></i></a>
+                        <td class="align-middle text-center">
+                            <div class="btn-group shadow-sm" role="group" aria-label="actions">
+                                <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-sm btn-outline-info" title="Show"><i class="fas fa-eye"></i></a>
+                                <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="fas fa-edit"></i></a>
+                                <form method="POST" action="{{ route('admin.users.toggleActive', $user->id) }}" style="display:inline-block">
+                                    @csrf
+                                    <button class="btn btn-sm {{ $user->is_active ? 'btn-outline-warning' : 'btn-outline-success' }}" title="{{ $user->is_active ? 'Suspend' : 'Activate' }}">
+                                        <i class="fas {{ $user->is_active ? 'fa-ban' : 'fa-check' }}"></i>
+                                    </button>
+                                </form>
                                 <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" style="display:inline-block" onsubmit="return confirm('Delete user?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger" title="Delete"><i class="la la-trash"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
                                 </form>
                             </div>
                         </td>
@@ -67,7 +81,7 @@
     <div class="card-footer d-flex justify-content-between align-items-center">
         <div class="small text-muted">Showing {{ $users->firstItem() ?? 0 }} - {{ $users->lastItem() ?? 0 }} of {{ $users->total() }}</div>
         <div>
-            {{ $users->appends(request()->except('page'))->links('pagination::bootstrap-4') }}
+            {{ $users->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
         </div>
     </div>
 </div>

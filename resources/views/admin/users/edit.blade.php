@@ -33,8 +33,12 @@
         <input type="text" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}">
     </div>
     <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" name="is_admin" value="1" id="is_admin" {{ $user->is_admin ? 'checked' : '' }}>
+        <input class="form-check-input" type="checkbox" name="is_admin" value="1" id="is_admin" {{ old('is_admin', $user->is_admin) ? 'checked' : '' }}>
         <label class="form-check-label" for="is_admin">Is Admin</label>
+    </div>
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="is_active" value="1" id="is_active" {{ old('is_active', $user->is_active) ? 'checked' : '' }}>
+        <label class="form-check-label" for="is_active">Account Active</label>
     </div>
     <div class="mb-3">
         <label class="form-label">OneSignal Player ID</label>

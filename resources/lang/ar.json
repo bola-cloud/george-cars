@@ -1,0 +1,22 @@
+{
+  "Dashboard": "لوحة التحكم",
+  "Users": "المستخدمون",
+  "Devices": "الأجهزة",
+  "Settings": "الإعدادات",
+  "Edit User": "تعديل المستخدم",
+  "Delete User": "حذف المستخدم",
+  "Search users by name, email or phone": "ابحث بالمستخدم بالاسم أو البريد أو الهاتف",
+  "Create User": "إنشاء مستخدم",
+  "Active": "نشط",
+  "Suspended": "موقوف",
+  "Account Active": "الحساب مفعل",
+  "Suspend Account": "إيقاف الحساب",
+  "Activate Account": "تفعيل الحساب",
+  "Phone": "الهاتف",
+  "Role": "الدور",
+  "Registered": "تاريخ التسجيل",
+  "Devices": "الأجهزة",
+  "Actions": "الإجراءات",
+  "Save Permissions": "حفظ الصلاحيات",
+  "Revoke": "سحب الصلاحية"
+}

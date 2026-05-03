@@ -59,6 +59,16 @@ class AuthController extends Controller
         }
 
         $user = User::where('email', $request->email)->firstOrFail();
+
+        if (!$user->is_active) {
+            auth()->logout();
+            return response()->json([
+                'message' => 'Account is suspended. Please contact support.',
+                'status' => false,
+                'data' => null,
+            ], 403);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([

@@ -33,6 +33,7 @@ class User extends Authenticatable
         'phone',
         'is_admin',
         'onesignal',
+        'is_active',
     ];
 
     public function projects(): HasMany
