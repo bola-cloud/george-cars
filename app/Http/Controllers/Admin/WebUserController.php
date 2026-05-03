@@ -90,7 +90,7 @@ class WebUserController extends Controller
         }
 
         $data = $request->only(['name','email','phone','onesignal']);
-        
+
         // Handle boolean fields
         $data['is_admin'] = $request->has('is_admin');
         $data['is_active'] = $request->has('is_active');

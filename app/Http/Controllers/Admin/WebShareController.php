@@ -12,7 +12,7 @@ class WebShareController extends Controller
     public function updateUserShare(Request $request, $id)
     {
         $share = UserShare::findOrFail($id);
-        
+
         $request->validate([
             'permissions' => 'required|array',
         ]);
@@ -38,7 +38,7 @@ class WebShareController extends Controller
     public function updateDeviceShare(Request $request, $id)
     {
         $share = DeviceShare::findOrFail($id);
-        
+
         $request->validate([
             'permissions' => 'required|array',
         ]);
