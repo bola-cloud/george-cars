@@ -1,88 +1,73 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="card border-0 shadow-sm rounded-4">
-    <div class="card-header border-0 bg-white py-4 d-flex justify-content-between align-items-center">
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-1 text-dark fw-bold">Users <span class="badge bg-primary rounded-pill fs-6">{{ $users->total() }}</span></h4>
-            <div class="text-muted small">Manage application users and accounts</div>
+            <h4 class="mb-0">Users <small class="text-muted">({{ $users->total() }})</small></h4>
+            <div class="text-muted small">Manage application users</div>
         </div>
 
-        <div class="d-flex align-items-center gap-3">
-            <form method="GET" action="{{ route('admin.users.index') }}" class="m-0">
-                <div class="input-group">
-                    <span class="input-group-text bg-light border-0"><i class="la la-search text-muted"></i></span>
-                    <input type="search" name="q" class="form-control bg-light border-0 shadow-none" placeholder="Search by name, email, phone..." value="{{ request('q') }}">
+        <div class="d-flex align-items-center">
+            <form method="GET" action="{{ route('admin.users.index') }}" class="me-2">
+                <div class="input-group input-group-sm">
+                    <input type="search" name="q" class="form-control" placeholder="Search users by name, email or phone" value="{{ request('q') }}">
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
                 </div>
             </form>
-            <a href="{{ route('admin.users.create') }}" class="btn btn-primary px-4 shadow-sm" style="border-radius: 8px;">
-                <i class="la la-plus"></i> Create User
-            </a>
+            <a href="{{ route('admin.users.create') }}" class="btn btn-sm btn-primary">Create User</a>
         </div>
     </div>
 
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light text-muted">
+            <table class="table table-hover table-sm mb-0">
+                <thead class="table-light">
                     <tr>
-                        <th class="ps-4 fw-medium border-0" style="width:80px">ID</th>
-                        <th class="fw-medium border-0">Name</th>
-                        <th class="fw-medium border-0">Email</th>
-                        <th class="fw-medium border-0">Phone</th>
-                        <th class="fw-medium border-0" style="width:110px">Status</th>
-                        <th class="fw-medium border-0" style="width:110px">Role</th>
-                        <th class="fw-medium border-0 text-center" style="width:190px">Actions</th>
+                        <th style="width:64px">ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th style="width:90px">Status</th>
+                        <th style="width:90px">Role</th>
+                        <th style="width:150px" class="text-center">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="border-top-0">
+                <tbody>
                 @foreach($users as $user)
                     <tr>
-                        <td class="ps-4 text-muted">#{{ $user->id }}</td>
-                        <td>
-                            <a href="{{ route('admin.users.show', $user->id) }}" class="fw-bold text-dark text-decoration-none d-flex align-items-center">
-                                <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-2" style="width:32px; height:32px; font-size:14px;">
-                                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                                </div>
-                                {{ $user->name }}
-                            </a>
-                        </td>
-                        <td><a href="mailto:{{ $user->email }}" class="text-muted text-decoration-none">{{ $user->email }}</a></td>
-                        <td class="text-muted">{{ $user->phone ?? '-' }}</td>
-                        <td>
+                        <td class="align-middle">{{ $user->id }}</td>
+                        <td class="align-middle"><a href="{{ route('admin.users.show', $user->id) }}" class="fw-bold text-decoration-none">{{ $user->name }}</a></td>
+                        <td class="align-middle"><a href="mailto:{{ $user->email }}">{{ $user->email }}</a></td>
+                        <td class="align-middle">{{ $user->phone ?? '-' }}</td>
+                        <td class="align-middle">
                             @if($user->is_active)
-                                <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 border border-success-subtle">Active</span>
+                                <span class="badge bg-success">Active</span>
                             @else
-                                <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2 border border-danger-subtle">Suspended</span>
+                                <span class="badge bg-danger">Suspended</span>
                             @endif
                         </td>
-                        <td>
+                        <td class="align-middle">
                             @if($user->is_admin)
-                                <span class="badge bg-primary rounded-pill px-3 py-2">Administrator</span>
+                                <span class="badge bg-primary">Admin</span>
                             @else
-                                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2 text-dark">User</span>
+                                <span class="badge bg-secondary">User</span>
                             @endif
                         </td>
-                        <td class="text-center">
-                            <div class="d-flex justify-content-center gap-2">
-                                <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width:32px; height:32px;" title="Show">
-                                    <i class="la la-eye fs-5 text-info"></i>
-                                </a>
-                                <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width:32px; height:32px;" title="Edit">
-                                    <i class="la la-pen fs-5 text-primary"></i>
-                                </a>
-                                <form method="POST" action="{{ route('admin.users.toggleActive', $user->id) }}" class="m-0">
+                        <td class="align-middle text-center">
+                            <div class="btn-group shadow-sm" role="group" aria-label="actions">
+                                <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-sm btn-outline-info" title="Show"><i class="fas fa-eye"></i></a>
+                                <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="fas fa-edit"></i></a>
+                                <form method="POST" action="{{ route('admin.users.toggleActive', $user->id) }}" style="display:inline-block">
                                     @csrf
-                                    <button class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width:32px; height:32px;" title="{{ $user->is_active ? 'Suspend' : 'Activate' }}">
-                                        <i class="la {{ $user->is_active ? 'la-ban text-warning' : 'la-check text-success' }} fs-5"></i>
+                                    <button class="btn btn-sm {{ $user->is_active ? 'btn-outline-warning' : 'btn-outline-success' }}" title="{{ $user->is_active ? 'Suspend' : 'Activate' }}">
+                                        <i class="fas {{ $user->is_active ? 'fa-ban' : 'fa-check' }}"></i>
                                     </button>
                                 </form>
-                                <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" class="m-0" onsubmit="return confirm('Delete user?')">
+                                <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" style="display:inline-block" onsubmit="return confirm('Delete user?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width:32px; height:32px;" title="Delete">
-                                        <i class="la la-trash fs-5 text-danger"></i>
-                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
                                 </form>
                             </div>
                         </td>
@@ -93,16 +78,12 @@
         </div>
     </div>
 
-    @if($users->hasPages())
-    <div class="card-footer bg-white border-0 py-3 d-flex justify-content-between align-items-center rounded-bottom-4">
-        <div class="small text-muted">Showing <strong>{{ $users->firstItem() ?? 0 }}</strong> to <strong>{{ $users->lastItem() ?? 0 }}</strong> of <strong>{{ $users->total() }}</strong> entries</div>
+    <div class="card-footer d-flex justify-content-between align-items-center">
+        <div class="small text-muted">Showing {{ $users->firstItem() ?? 0 }} - {{ $users->lastItem() ?? 0 }} of {{ $users->total() }}</div>
         <div>
             {{ $users->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
         </div>
     </div>
-    @else
-    <div class="pb-3 text-center text-muted small">Showing all {{ $users->total() }} entries</div>
-    @endif
 </div>
 
 @endsection
