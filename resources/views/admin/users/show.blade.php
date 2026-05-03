@@ -259,11 +259,3 @@
 </div>
 
 @endsection
-                <tr><td colspan="4" class="text-center py-3 text-muted">No specific device shares</td></tr>
-            @endforelse
-            </tbody>
-        </table>
-    </div>
-</div>
-
-@endsection
