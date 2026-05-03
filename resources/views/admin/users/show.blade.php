@@ -1,29 +1,60 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-header row mb-3">
-    <div class="content-header-left col-md-6 col-12 mb-2">
-        <h3 class="content-header-title mb-0">User Details <small class="text-muted">#{{ $user->id }}</small></h3>
+<style>
+/* Modern UI Overrides */
+.modern-card { border: none !important; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.03) !important; margin-bottom: 1.5rem; overflow: hidden; background: #fff; }
+.modern-card .card-header { background-color: #fff !important; border-bottom: 1px solid #f3f4f6 !important; padding: 1.5rem 1.5rem 1rem !important; }
+.modern-card .card-title { font-weight: 700; color: #1e293b; font-size: 1.15rem; margin: 0; }
+.modern-table { margin-bottom: 0; }
+.modern-table thead th { border-bottom: none !important; border-top: none !important; background-color: #f8fafc !important; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; padding: 1rem 1.25rem; }
+.modern-table tbody td { padding: 1rem 1.25rem; vertical-align: middle; border-top: 1px solid #f3f4f6; color: #475569; font-size: 0.9rem; }
+.modern-table tbody tr:hover { background-color: #f8fafc; }
+.modern-badge { padding: 0.45em 0.85em; border-radius: 6px; font-weight: 600; letter-spacing: 0.3px; }
+.modern-badge-success { background-color: #d1fae5 !important; color: #059669 !important; border: 1px solid #a7f3d0; }
+.modern-badge-danger { background-color: #fee2e2 !important; color: #dc2626 !important; border: 1px solid #fecaca; }
+.modern-badge-info { background-color: #e0e7ff !important; color: #4f46e5 !important; border: 1px solid #c7d2fe; }
+.modern-badge-secondary { background-color: #f1f5f9 !important; color: #475569 !important; border: 1px solid #e2e8f0; }
+.modern-badge-warning { background-color: #fef3c7 !important; color: #d97706 !important; border: 1px solid #fde68a; }
+.modern-btn { border-radius: 8px; padding: 0.4rem 0.8rem; font-weight: 500; font-size: 0.85rem; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.modern-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
+.modern-btn-circle { border-radius: 50%; width: 34px; height: 34px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; background: #fff; color: #64748b; transition: all 0.2s; }
+.modern-btn-circle:hover { background: #f8fafc; color: #0ea5e9; border-color: #0ea5e9; }
+.modern-btn-circle.danger:hover { color: #ef4444; border-color: #ef4444; background: #fef2f2; }
+.user-info-row th { width: 30%; color: #64748b; font-weight: 500; padding: 0.8rem 1rem; border-bottom: 1px solid #f3f4f6; }
+.user-info-row td { color: #1e293b; font-weight: 600; padding: 0.8rem 1rem; border-bottom: 1px solid #f3f4f6; }
+.user-info-row:last-child th, .user-info-row:last-child td { border-bottom: none; }
+.info-section-icon { padding: 12px; background: #f0fdf4; color: #16a34a; border-radius: 12px; margin-right: 15px; font-size: 1.5rem; }
+.info-section-icon.blue { background: #eff6ff; color: #3b82f6; }
+.info-section-icon.purple { background: #faf5ff; color: #a855f7; }
+</style>
+
+<div class="content-header row mb-3 align-items-center">
+    <div class="col-md-6 col-12">
+        <h3 class="content-header-title mb-0" style="font-weight:700; color:#1e293b;">
+            <i class="la la-user mr-1 text-primary"></i> {{ $user->name }}
+        </h3>
+        <p class="text-muted small mt-1 mb-0">{{ $user->email }}</p>
     </div>
-    <div class="content-header-right col-md-6 col-12">
-        <div class="btn-group float-md-right">
-            <form action="{{ route('admin.users.toggleActive', $user->id) }}" method="POST" style="margin:0;">
+    <div class="col-md-6 col-12 text-md-right mt-2 mt-md-0">
+        <div class="btn-group">
+            <form action="{{ route('admin.users.toggleActive', $user->id) }}" method="POST" style="margin:0;" class="mr-2">
                 @csrf
                 @if($user->is_active)
-                    <button class="btn btn-warning" onclick="return confirm('Suspend user account?')">
+                    <button class="btn btn-white modern-btn modern-badge-warning" onclick="return confirm('Suspend user account?')">
                         <i class="la la-ban"></i> Suspend
                     </button>
                 @else
-                    <button class="btn btn-success" onclick="return confirm('Activate user account?')">
+                    <button class="btn btn-white modern-btn modern-badge-success" onclick="return confirm('Activate user account?')">
                         <i class="la la-check"></i> Activate
                     </button>
                 @endif
             </form>
-            <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-info"><i class="la la-pencil"></i> Edit</a>
+            <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-white modern-btn modern-badge-info mr-2"><i class="la la-pencil"></i> Edit Profile</a>
             <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" style="margin:0;" onsubmit="return confirm('Delete user completely?')">
                 @csrf
                 @method('DELETE')
-                <button class="btn btn-danger"><i class="la la-trash"></i> Delete</button>
+                <button class="btn btn-white modern-btn modern-badge-danger"><i class="la la-trash"></i> Delete</button>
             </form>
         </div>
     </div>
@@ -31,48 +62,49 @@
 
 <div class="row">
     <div class="col-md-6">
-        <div class="card">
-            <div class="card-header border-bottom">
+        <div class="card modern-card">
+            <div class="card-header d-flex align-items-center">
+                <div class="info-section-icon blue"><i class="la la-info-circle"></i></div>
                 <h4 class="card-title">User Information</h4>
             </div>
-            <div class="card-content collapse show">
-                <div class="card-body">
+            <div class="card-content">
+                <div class="card-body p-0">
                     <table class="table table-borderless table-sm mb-0">
-                        <tr>
-                            <th class="w-25 text-muted">Name</th>
-                            <td class="font-weight-bold">{{ $user->name }}</td>
+                        <tr class="user-info-row">
+                            <th>Account ID</th>
+                            <td>#{{ $user->id }}</td>
                         </tr>
-                        <tr>
-                            <th class="text-muted">Email</th>
-                            <td>{{ $user->email }}</td>
+                        <tr class="user-info-row">
+                            <th>Full Name</th>
+                            <td>{{ $user->name }}</td>
                         </tr>
-                        <tr>
-                            <th class="text-muted">Phone</th>
-                            <td>{{ $user->phone ?? 'N/A' }}</td>
+                        <tr class="user-info-row">
+                            <th>Phone Number</th>
+                            <td>{{ $user->phone ?? 'Not Provided' }}</td>
                         </tr>
-                        <tr>
-                            <th class="text-muted">Role</th>
+                        <tr class="user-info-row">
+                            <th>System Role</th>
                             <td>
                                 @if($user->is_admin)
-                                    <span class="badge badge-info">Administrator</span>
+                                    <span class="badge modern-badge modern-badge-info">Administrator</span>
                                 @else
-                                    <span class="badge badge-secondary">User</span>
+                                    <span class="badge modern-badge modern-badge-secondary">Standard User</span>
                                 @endif
                             </td>
                         </tr>
-                        <tr>
-                            <th class="text-muted">Status</th>
+                        <tr class="user-info-row">
+                            <th>Current Status</th>
                             <td>
                                 @if($user->is_active)
-                                    <span class="badge badge-success">Active</span>
+                                    <span class="badge modern-badge modern-badge-success">Active Account</span>
                                 @else
-                                    <span class="badge badge-danger">Suspended</span>
+                                    <span class="badge modern-badge modern-badge-danger">Suspended</span>
                                 @endif
                             </td>
                         </tr>
-                        <tr>
-                            <th class="text-muted">Registered</th>
-                            <td>{{ $user->created_at ? $user->created_at->format('Y-m-d H:i') : 'N/A' }}</td>
+                        <tr class="user-info-row">
+                            <th>Join Date</th>
+                            <td>{{ $user->created_at ? $user->created_at->format('F j, Y - H:i') : 'Unknown' }}</td>
                         </tr>
                     </table>
                 </div>
@@ -81,177 +113,52 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header border-bottom">
-        <h4 class="card-title">Devices <span class="badge badge-primary">{{ $user->devices->count() }}</span></h4>
+<div class="card modern-card mt-2">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <div class="info-section-icon"><i class="la la-server"></i></div>
+            <div>
+                <h4 class="card-title">Owned Devices <span class="badge modern-badge modern-badge-info ml-2">{{ $user->devices->count() }}</span></h4>
+                <p class="text-muted small mt-1 mb-0">Hardware devices currently registered to this user</p>
+            </div>
+        </div>
     </div>
-    <div class="card-content collapse show">
+    <div class="card-content">
         <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0">
-                <thead class="bg-light">
+            <table class="table modern-table">
+                <thead>
                     <tr>
-                        <th style="width:64px;">ID</th>
-                        <th>Name</th>
-                        <th>Serial</th>
-                        <th>IP</th>
+                        <th style="width:80px;">ID</th>
+                        <th>Device Identity</th>
+                        <th>Network IP</th>
                         <th class="text-center" style="width:120px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
         @forelse($user->devices as $device)
             <tr>
-                <td class="align-middle text-muted">#{{ $device->id }}</td>
-                <td class="align-middle font-weight-bold">{{ $device->name }}</td>
-                <td class="align-middle"><code>{{ $device->serial }}</code></td>
-                <td class="align-middle"><i class="la la-server text-muted"></i> {{ $device->ip }}</td>
-                <td class="align-middle text-center">
-                    <div class="btn-group">
-                        <a href="{{ route('admin.devices.edit', $device->id) }}" class="btn btn-sm btn-info"><i class="la la-pencil"></i></a>
+                <td class="text-muted font-weight-bold">#{{ $device->id }}</td>
+                <td>
+                    <div class="font-weight-bold text-dark" style="font-size:1rem;">{{ $device->name }}</div>
+                    <code class="mt-1 d-inline-block">{{ $device->serial }}</code>
+                </td>
+                <td>
+                    <span class="text-secondary"><i class="la la-wifi mr-1"></i>{{ $device->ip }}</span>
+                </td>
+                <td class="text-center">
+                    <div class="d-flex justify-content-center">
+                        <a href="{{ route('admin.devices.edit', $device->id) }}" class="modern-btn-circle mr-2" title="Edit"><i class="la la-pencil"></i></a>
                         <form method="POST" action="{{ route('admin.devices.destroy', $device->id) }}" style="margin:0;" onsubmit="return confirm('Delete device?')">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-sm btn-danger"><i class="la la-trash"></i></button>
+                            <button class="modern-btn-circle danger" title="Delete"><i class="la la-trash"></i></button>
                         </form>
                     </div>
                 </td>
             </tr>
         @empty
-            <tr><td colspan="5" class="text-center py-4 text-muted">No devices associated with this user.</td></tr>
+            <tr><td colspan="4" class="text-center py-5 text-muted"><i class="la la-inbox text-light" style="font-size:3rem; display:block; margin-bottom:10px;"></i>No devices associated with this user yet.</td></tr>
         @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div class="content-header row mt-4 mb-2">
-    <div class="col-12">
-        <h3 class="content-header-title mb-0">Sharing & Permissions</h3>
-        <p class="text-muted">Manage how devices are shared according to the new API approach.</p>
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-header border-bottom">
-        <h4 class="card-title"><i class="la la-globe text-primary"></i> Universal Shares (user_shares)</h4>
-        <p class="card-subtitle text-muted mt-1">This user shared <b>ALL</b> their current and future devices with the users below. This acts as a fallback or baseline permission.</p>
-    </div>
-    <div class="card-content collapse show">
-        <div class="table-responsive">
-            <table class="table table-bordered mb-0">
-                <thead class="bg-light">
-                    <tr>
-                        <th style="width:25%;">Shared With</th>
-                        <th>Baseline Permissions</th>
-                        <th class="text-center" style="width:120px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-            @forelse($userShares as $uShare)
-                <tr>
-                    <td class="align-middle">
-                        <div class="font-weight-bold">{{ $uShare->user->name ?? 'Unknown' }}</div>
-                        <div class="text-muted small">Target ID: #{{ $uShare->user_id }}</div>
-                    </td>
-                    <td class="align-middle">
-                        @php
-                            $perms = $uShare->meta['permissions'] ?? [];
-                            $allPerms = ['can_open', 'can_stop', 'can_close', 'can_delete', 'can_rename', 'can_schedule', 'can_change_type', 'can_manage_presets'];
-                        @endphp
-                        <form action="{{ route('admin.user_shares.update', $uShare->id) }}" method="POST" style="margin:0;">
-                            @csrf
-                            @method('PUT')
-                            <div class="row">
-                                @foreach($allPerms as $p)
-                                <div class="col-md-3 mb-1">
-                                    <div class="custom-control custom-switch custom-control-inline">
-                                        <input type="hidden" name="permissions[{{ $p }}]" value="0">
-                                        <input class="custom-control-input" type="checkbox" name="permissions[{{ $p }}]" value="1" id="uShare_{{$uShare->id}}_{{$p}}" {{ isset($perms[$p]) && $perms[$p] ? 'checked' : '' }}>
-                                        <label class="custom-control-label" style="font-size: 0.85rem;" for="uShare_{{$uShare->id}}_{{$p}}">{{ ucfirst(str_replace('can_', '', $p)) }}</label>
-                                    </div>
-                                </div>
-                                @endforeach
-                            </div>
-                            <button type="submit" class="btn btn-sm btn-outline-primary mt-1"><i class="la la-save"></i> Save</button>
-                        </form>
-                    </td>
-                    <td class="text-center align-middle">
-                        <form method="POST" action="{{ route('admin.user_shares.destroy', $uShare->id) }}" style="margin:0;" onsubmit="return confirm('Revoke this share?')">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-danger"><i class="la la-trash"></i> Revoke</button>
-                        </form>
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="3" class="text-center py-4 text-muted">No universal shares found.</td></tr>
-            @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-header border-bottom">
-        <h4 class="card-title"><i class="la la-mobile-phone text-info"></i> Specific Device Shares (device_shares)</h4>
-        <p class="card-subtitle text-muted mt-1">This user shared a <b>specific device</b> with the users below. These permissions override the universal share if both exist.</p>
-    </div>
-    <div class="card-content collapse show">
-        <div class="table-responsive">
-            <table class="table table-bordered mb-0">
-                <thead class="bg-light">
-                    <tr>
-                        <th style="width:20%;">Device</th>
-                        <th style="width:20%;">Shared With</th>
-                        <th>Device-Level Permissions</th>
-                        <th class="text-center" style="width:120px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-            @forelse($deviceShares as $dShare)
-                <tr>
-                    <td class="align-middle">
-                        <div class="font-weight-bold">{{ $dShare->device->name ?? 'Unknown' }}</div>
-                        <div class="text-muted small">Device ID: #{{ $dShare->device_id }}</div>
-                    </td>
-                    <td class="align-middle">
-                        <div class="font-weight-bold">{{ $dShare->user->name ?? 'Unknown' }}</div>
-                        <div class="text-muted small">Target ID: #{{ $dShare->user_id }}</div>
-                    </td>
-                    <td class="align-middle">
-                        @php
-                            $perms = $dShare->meta['permissions'] ?? [];
-                            $allPerms = ['can_open', 'can_stop', 'can_close', 'can_delete', 'can_rename', 'can_schedule', 'can_change_type', 'can_manage_presets'];
-                        @endphp
-                        <form action="{{ route('admin.device_shares.update', $dShare->id) }}" method="POST" style="margin:0;">
-                            @csrf
-                            @method('PUT')
-                            <div class="row">
-                                @foreach($allPerms as $p)
-                                <div class="col-md-3 mb-1">
-                                    <div class="custom-control custom-switch custom-control-inline">
-                                        <input type="hidden" name="permissions[{{ $p }}]" value="0">
-                                        <input class="custom-control-input" type="checkbox" name="permissions[{{ $p }}]" value="1" id="dShare_{{$dShare->id}}_{{$p}}" {{ isset($perms[$p]) && $perms[$p] ? 'checked' : '' }}>
-                                        <label class="custom-control-label" style="font-size: 0.85rem;" for="dShare_{{$dShare->id}}_{{$p}}">{{ ucfirst(str_replace('can_', '', $p)) }}</label>
-                                    </div>
-                                </div>
-                                @endforeach
-                            </div>
-                            <button type="submit" class="btn btn-sm btn-outline-primary mt-1"><i class="la la-save"></i> Save</button>
-                        </form>
-                    </td>
-                    <td class="text-center align-middle">
-                        <form method="POST" action="{{ route('admin.device_shares.destroy', $dShare->id) }}" style="margin:0;" onsubmit="return confirm('Revoke this share?')">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-danger"><i class="la la-trash"></i> Revoke</button>
-                        </form>
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="4" class="text-center py-4 text-muted">No specific device shares found.</td></tr>
-            @endforelse
                 </tbody>
             </table>
         </div>
